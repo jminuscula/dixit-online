@@ -83,6 +83,9 @@ class Game(models.Model):
         return player
 
     def add_round(self):
+        """
+        Adds a new round to the game for the next player's turn
+        """
         from dixit.game.models import Player, Round
 
         if not self.current_round:
@@ -119,14 +122,18 @@ class Game(models.Model):
             raise GameRoundIncomplete('round has pending players')
 
         scores = defaultdict(lambda x: 0)
+        guesses = {p.player: False for p in plays}
 
         for play in plays:
             if play.card_chosen == story_card:
-                scores[play.player] += 3
-                scores[storyteller] = 3
+                scores[play.player] += settings.GAME_GUESS_SCORE
+                guesses[play.player] = True
             else:
                 chosen_play = Play.objects.get(card=play.card_chosen, game_round=game_round)
                 scores[chosen_play.player] += 1
+
+        if not all(guesses.values()):
+            scores[storyteller] = settings.GAME_STORY_SCORE
 
         for player, score in scores.items():
             player.score += min(GAME_MAX_ROUND_SCORE, score)

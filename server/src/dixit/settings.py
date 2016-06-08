@@ -6,6 +6,8 @@ import os
 
 # Game settings
 GAME_HAND_SIZE = 5
+GAME_GUESS_SCORE = 3
+GAME_STORY_SCORE = 3
 GAME_MAX_ROUND_SCORE = 4
 
 
