@@ -1,6 +1,11 @@
 
+from collections import defaultdict
+
 from django.db import models
 from django.utils.translation import ugettext as _
+from django.core.exceptions import ObjectDoesNotExist
+
+from dixit.game.exceptions import GameRoundIncomplete
 
 
 class Game(models.Model):
@@ -38,7 +43,7 @@ class Game(models.Model):
         rounds = self.rounds.all().order_by('-number')
         if rounds:
             return rounds[0]
-        raise AttributeError('Game does not have any rounds yet')
+        return None
 
     def __str__(self):
         return self.name
@@ -63,10 +68,7 @@ class Game(models.Model):
         player = Player(game=game, name=player_name, owner=True)
         player.save()
 
-        game_round = Round(game=game, number=0, turn=player)
-        game_round.save()
-        game_round.deal()
-
+        game.add_round()
         return game
 
     def add_player(self, player_name):
@@ -79,3 +81,55 @@ class Game(models.Model):
         self.current_round.deal()
 
         return player
+
+    def add_round(self):
+        from dixit.game.models import Player, Round
+
+        if not self.current_round:
+            number, turn = 0, 0
+        else:
+            number = self.current_round.number + 1
+            turn = (self.current_round.turn.order + 1) % self.players.count()
+
+        player = Player.objects.get(game=self, order=turn)
+        game_round = Round(game=self, number=number, turn=player)
+        game_round.save()
+        game_round.deal()
+
+        return game_round
+
+    def complete_round(self):
+        """
+        Closes the current round and updates the scoring.
+        A new round is added.
+        """
+        from dixit.game.models import Play
+
+        game_round = self.current_round
+        storyteller = self.storyteller
+
+        try:
+            story_play = Play.objects.get(game_round=game_round, player=storyteller)
+            story_card = story_play.card_provided
+        except ObjectDoesNotExist:
+            raise GameRoundIncomplete('storyteller needs to choose a card')
+
+        plays = Play.objects.filter(game_round=game_round)
+        if not all(p.card_chosen for p in players_plays):
+            raise GameRoundIncomplete('round has pending players')
+
+        scores = defaultdict(lambda x: 0)
+
+        for play in plays:
+            if play.card_chosen == story_card:
+                scores[play.player] += 3
+                scores[storyteller] = 3
+            else:
+                chosen_play = Play.objects.get(card=play.card_chosen, game_round=game_round)
+                scores[chosen_play.player] += 1
+
+        for player, score in scores.items():
+            player.score += min(GAME_MAX_ROUND_SCORE, score)
+            player.save()
+
+        return self.add_round()

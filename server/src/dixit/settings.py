@@ -6,6 +6,7 @@ import os
 
 # Game settings
 GAME_HAND_SIZE = 5
+GAME_MAX_ROUND_SCORE = 4
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

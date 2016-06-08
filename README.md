@@ -61,7 +61,7 @@ Requirements:
 
 7. Sync available cards
 
-    `$ ./src/manage.py game sync-cards`
+    `$ ./src/manage.py sync-cards`
 
 8. Run application server
 

@@ -78,10 +78,6 @@ class Round(models.Model):
             return self.save()
 
 
-    def get_system_card(self):
-        pass
-
-
 class Play(models.Model):
     """
     Describes a playing move for a player in a round.
