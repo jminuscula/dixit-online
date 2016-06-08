@@ -1,3 +1,25 @@
+#
+# Personal and project files
+#
+
+_design
+
+
+#
+# Data
+#
+
+db.sqlite3
+
+
+#
+# Python
+#
+
+# Virtualenv
+pip-selfcheck.json
+pyvenv.cfg
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
