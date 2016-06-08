@@ -22,7 +22,7 @@ class Player(models.Model):
     token = models.CharField(max_length=64)
     score = models.IntegerField(default=0)
     order = models.IntegerField(default=0)
-    cards = models.ManyToManyField(Card)
+    cards = models.ManyToManyField(Card, related_name='played_by')
 
     class Meta:
         verbose_name = _('player')

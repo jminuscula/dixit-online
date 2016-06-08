@@ -13,7 +13,7 @@ STATIC_URL = '/static/'
 
 
 # Folder with game card images
-CARD_IMAGES_PATH = os.path.join(BASE_DIR, '../../../cards')
+CARD_IMAGES_PATH = os.path.join(BASE_DIR, '../../cards')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/

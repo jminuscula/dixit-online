@@ -1,8 +1,27 @@
 
 from django.db import models
+from django.db.models import Q
 from django.utils.translation import ugettext as _
 
 from dixit import settings
+
+
+class CardManager(models.Manager):
+
+    def available_for_game(self, game):
+        """
+        Returns the cards remaining in the game deck
+        """
+        from dixit.game.models import Play
+
+        game_rounds = game.rounds.all()
+        plays = Play.objects.filter(game_round__in=game_rounds)
+
+        played_cards = Q(plays__in=plays)
+        dealt_cards = Q(played_by__in=game.players.all())
+        system_cards = Q(system_round_play__in=game_rounds)
+
+        return self.all().exclude(played_cards | dealt_cards | system_cards)
 
 
 class Card(models.Model):
@@ -12,7 +31,9 @@ class Card(models.Model):
     Players choose and vote these cards in each round.
     """
     path = models.FilePathField(settings.CARD_IMAGES_PATH)
-    name = models.CharField(max_length=256, blank=True)
+    name = models.CharField(max_length=256, null=True)
+
+    objects = CardManager()
 
     class Meta:
         verbose_name = _('card')

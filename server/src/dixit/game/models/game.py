@@ -32,28 +32,6 @@ class Game(models.Model):
 
         ordering = ('-created_on', )
 
-    def __str__(self):
-        return self.name
-
-    @classmethod
-    def new_game(cls, name, player_name):
-        """
-        Bootstraps a new game with a round and a storyteller player
-        """
-        game = cls(name=name).save()
-        player = Player(game=game, name=player_name, owner=True).save()
-        game_round = Round(game=game, number=0, turn=player).save()
-        game_round.deal()
-
-        return game
-
-    def cards_available(self):
-        """
-        Returns the cards remaining in the game deck
-        """
-
-    def scoreboard(self):
-        return {p.id: p.score for p in self.players.all()}
 
     @property
     def current_round(self):
@@ -61,3 +39,43 @@ class Game(models.Model):
         if rounds:
             return rounds[0]
         raise AttributeError('Game does not have any rounds yet')
+
+    def __str__(self):
+        return self.name
+
+    @property
+    def storyteller(self):
+        """
+        Storyteller of the current round
+        """
+        return self.current_round.turn
+
+    @classmethod
+    def new_game(cls, name, player_name):
+        """
+        Bootstraps a new game with a round and a storyteller player
+        """
+        from dixit.game.models import Player, Round
+
+        game = cls(name=name)
+        game.save()
+
+        player = Player(game=game, name=player_name, owner=True)
+        player.save()
+
+        game_round = Round(game=game, number=0, turn=player)
+        game_round.save()
+        game_round.deal()
+
+        return game
+
+    def add_player(self, player_name):
+        from dixit.game.models import Player
+
+        order = self.players.count() + 1
+        player = Player(game=self, name=player_name, order=order)
+        player.save()
+
+        self.current_round.deal()
+
+        return player

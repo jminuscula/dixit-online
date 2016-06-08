@@ -33,7 +33,7 @@ class Round(models.Model):
     number = models.IntegerField(default=0)
     turn = models.ForeignKey(Player)
     complete = models.CharField(max_length=64, choices=STATUS, default='new')
-    card = models.ForeignKey(Card)
+    card = models.ForeignKey(Card, null=True, related_name='system_round_play')
 
     class Meta:
         verbose_name = _('round')
@@ -42,33 +42,40 @@ class Round(models.Model):
         ordering = ('number', )
         unique_together = (('game', 'number'))
 
+
     def __str__(self):
-        return "{} (Game {})".format(self.id, self.game.id)
+        return "{} ({} of game {})".format(self.id, self.number, self.game.id)
 
     def deal(self):
         """
         Provides the players with cards and chooses the system card for this round.
 
-        Each player must always have `GAME_HAND_SIZE` cards available.
+        Each player must always have `GAME_HAND_SIZE` cards available. Players always
+        lose a single card per round, so no calculation should be necessary. However,
+        this method allows us to deal the initial hand to all players.
         """
-        cards_available = self.game.cards_available()
+        cards_available = list(Card.objects.available_for_game(self.game))
 
-        card_deals = { system: 1 }
-        current_players = self.game.current_round.players.all().select_related()
+        card_deals = { 'system': 1 if not self.card else 0 }
+        current_players = self.game.players.all().select_related()
         for player in current_players:
-            card_deals[player] = settings.GAME_HAND_SIZE - p.cards.count()
+            card_deals[player] = settings.GAME_HAND_SIZE - player.cards.count()
 
         cards_needed = sum(card_deals.values())
-
-        if len(cards_available) > cards_needed:
+        if cards_needed > len(cards_available):
             raise GameDeckExhausted
 
-        self.card = random.choice(cards_available)
-        self.save()
+        def get_choice(seq):
+            idx = random.randint(0, len(seq) - 1)
+            return seq.pop(idx)
 
         for player in current_players:
-            for i in range(settings.GAME_HAND_SIZE - player.cards.count()):
-                player.cards.add(random.choice(cards_available))
+            cards = [get_choice(cards_available) for i in range(card_deals[player])]
+            player.cards.add(*cards)
+
+        if not self.card:
+            self.card = get_choice(cards_available)
+            return self.save()
 
 
     def get_system_card(self):
@@ -88,9 +95,13 @@ class Play(models.Model):
 
     game_round = models.ForeignKey(Round, related_name='plays')
     player = models.ForeignKey(Player)
-    card_provided = models.ForeignKey(Card, null=True, related_name='provided')
+
+    # card being played in phase 1
+    card_provided = models.ForeignKey(Card, related_name='plays')
+    story = models.CharField(max_length=256, null=True)
+
+    # card voted in phase 2 (storyteller can't vote)
     card_chosen = models.ForeignKey(Card, null=True, related_name='chosen')
-    story = models.CharField(max_length=256, blank=True)
 
     class Meta:
         verbose_name = _('play')
