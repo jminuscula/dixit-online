@@ -117,7 +117,7 @@ class Game(models.Model):
         except ObjectDoesNotExist:
             raise GameRoundIncomplete('storyteller needs to choose a card')
 
-        plays = Play.objects.filter(game_round=game_round)
+        plays = Play.objects.filter(game_round=game_round).exclude(player=storyteller)
         if not all(p.card_chosen for p in players_plays):
             raise GameRoundIncomplete('round has pending players')
 
