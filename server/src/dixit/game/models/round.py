@@ -6,7 +6,7 @@ from django.utils.translation import ugettext as _
 
 from dixit import settings
 from dixit.game.models import Game, Card, Player
-from dixit.game.exceptions import GameDeckExhausted
+from dixit.game.exceptions import GameDeckExhausted, GameInvalidPlay
 
 
 class Round(models.Model):
@@ -105,3 +105,39 @@ class Play(models.Model):
 
         order_with_respect_to = 'player'
         unique_together = (('game_round', 'player'))
+
+    def provide_card(self, card, story=None):
+        """
+        Play a card for the current round.
+        Storytellers must provide a story when providing a card.
+        """
+        if story is None and self.player = self.game_round.turn:
+            raise GameInvalidPlay('the storyteller needs to provide a story')
+
+        self.card_provided = card
+        self.save()
+
+        return self
+
+    def choose_card(self, card):
+        """
+        Choose a card among all provided in the round. The round must be complete.
+        Players can't choose their own cards.
+        """
+        if self.player == self.game_round.turn:
+            raise GameInvalidPlay('storytellers can not choose any cards')
+
+        if card == self.card_provided:
+            raise GameInvalidPlay('player can not choose their own card')
+
+        round_cards = set(Card.objects.played_for_round(self.game_round))
+        if len(round_cards) != self.game_round.game.players.count():
+            raise GameInvalidPlay('not all players have provided a card yet')
+
+        if card not in round_cards:
+            raise GameInvalidPlay('the chosen card is not being played in this round')
+
+        self.card_chosen = card
+        self.save()
+
+        return self

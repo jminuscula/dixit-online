@@ -8,5 +8,11 @@ class GameDeckExhausted(Exception):
 
 class GameRoundIncomplete(Exception):
     """
-    The roudn can't be closed because actions are still pending
+    The round can't be closed because actions are still pending
+    """
+
+
+class GameInvalidPlay(Exception):
+    """
+    The play can't be performed
     """
