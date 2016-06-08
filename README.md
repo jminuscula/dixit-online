@@ -59,7 +59,11 @@ Requirements:
 
     `$ ./src/manage.py migrate`
 
-7. Run application server
+7. Sync available cards
+
+    `$ ./src/manage.py game sync-cards`
+
+8. Run application server
 
     `$ ./src/manage.py runserver`
 
