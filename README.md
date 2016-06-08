@@ -22,9 +22,38 @@ This project provides both a server implementing a *Game API* and a *Web Client*
 
 The API allows the games to be played asynchronously, so players may participate in a game at different times. A user may be a player in more than one game simultaneously.
 
+
 # Technology
 
 The API backend is based on [Django](https://djangoproject.org) and the client is an [Angular](https://angularjs.org) (1.5) application.
+
+
+# Install
+
+Requirements:
+  * Python 3.5
+
+Clone this repository
+`$ git clone git@github.com:jminuscula/dixit-online.git`
+
+Access the server folder
+`$ cd dixit-online/server`
+
+Create a new Python virtual environment
+`$ pyvenv-3.5 env`
+
+Activate the virtualenv
+`$ source env/bin/activate`
+
+Install Python dependencies
+`$ pip install -r requirements.txt`
+
+Create database
+`$ ./src/manage.py migrate`
+
+Run application server
+`$ ./src/manage.py runserver`
+
 
 # Copyright
 
