@@ -15,6 +15,8 @@ So the scoring is:
   * 3 points for players who correctly guess the storyteller's card
   * 1 points for player who provided a card that is chosen by any other player.
 
+The game ends when all cards have been dealt.
+
 
 # Online version
 
@@ -33,26 +35,33 @@ The API backend is based on [Django](https://djangoproject.org) and the client i
 Requirements:
   * Python 3.5
 
-Clone this repository
-`$ git clone git@github.com:jminuscula/dixit-online.git`
+1. Clone this repository
 
-Access the server folder
-`$ cd dixit-online/server`
+    `$ git clone git@github.com:jminuscula/dixit-online.git`
 
-Create a new Python virtual environment
-`$ pyvenv-3.5 env`
+2. Access the server folder
 
-Activate the virtualenv
-`$ source env/bin/activate`
+    `$ cd dixit-online/server`
 
-Install Python dependencies
-`$ pip install -r requirements.txt`
+3. Create a new Python virtual environment
 
-Create database
-`$ ./src/manage.py migrate`
+    `$ pyvenv-3.5 env`
 
-Run application server
-`$ ./src/manage.py runserver`
+4. Activate the virtualenv
+
+    `$ source env/bin/activate`
+
+5. Install Python dependencies
+
+    `$ pip install -r requirements.txt`
+
+6. Create database
+
+    `$ ./src/manage.py migrate`
+
+7. Run application server
+
+    `$ ./src/manage.py runserver`
 
 
 # Copyright
