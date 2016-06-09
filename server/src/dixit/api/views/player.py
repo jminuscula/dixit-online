@@ -1,12 +1,14 @@
 
 from django.http import Http404
+from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import generics, status
 
-from dixit.game.models import Player
-from dixit.api.serializers.player import PlayerSerializer, PlayerScoreSerializer
+from dixit.game.models import Player, Game
+from dixit.api.serializers.player import PlayerSerializer, PlayerCreateSerializer, PlayerScoreSerializer
 
 
 class PlayerList(generics.ListCreateAPIView):
@@ -14,9 +16,30 @@ class PlayerList(generics.ListCreateAPIView):
     model = Player
     serializer_class = PlayerSerializer
 
+    def _get_game(self):
+        return get_object_or_404(Game, pk=self.kwargs['game_pk'])
+
     def get_queryset(self):
-        game_pk = self.kwargs['game_pk']
-        return Player.objects.filter(game=game_pk)
+        return Player.objects.filter(game=self._get_game())
+
+    def get_serializer_class(self):
+        if self.request.method == 'POST':
+            return PlayerCreateSerializer
+        return PlayerSerializer
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        game = self._get_game()
+        try:
+            player = game.add_player(request.data['name'])
+        except IntegrityError:
+            return Response({"name": ["Username already in use"]}, status=status.HTTP_403_FORBIDDEN)
+
+        data = PlayerSerializer(player).data
+        return Response(data, status=status.HTTP_201_CREATED)
 
 
 class PlayerRetrieve(generics.RetrieveDestroyAPIView):
@@ -28,4 +51,4 @@ class PlayerRetrieve(generics.RetrieveDestroyAPIView):
     def get_object(self):
         game_pk = self.kwargs['game_pk']
         player_pk = self.kwargs['player_pk']
-        return Player.objects.get(game=game_pk, pk=player_pk)
+        return get_object_or_404(Player, game=game_pk, pk=player_pk)

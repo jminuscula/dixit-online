@@ -13,12 +13,19 @@ from dixit.api.serializers.round import RoundListSerializer
 class GameList(generics.ListCreateAPIView):
 
     model = Game
-    queryset = Game.objects.all()
+    lookup_url_kwarg = 'game_pk'
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
             return GameCreateSerializer
         return GameListSerializer
+
+    def get_queryset(self):
+        # TODO
+        # Filter Games by status
+        qs = Game.objects.all()
+        status = self.request.query_params.get('status', None)
+        return qs
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

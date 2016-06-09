@@ -9,8 +9,10 @@ from dixit.api.views import player as player_views
 
 
 urlpatterns = [
-    url(r'^game/$', game_views.GameList.as_view(), name='game-list'),
-    url(r'^game/(?P<game_pk>[0-9]+)/$', game_views.GameRetrieve.as_view(), name='game-detail'),
+    url(r'^game/$',
+        game_views.GameList.as_view(), name='game-list'),
+    url(r'^game/(?P<game_pk>[0-9]+)/$',
+        game_views.GameRetrieve.as_view(), name='game-detail'),
 
     # url(r'^games/(?P<pk>[0-9]+)/rounds$', round_views.RoundList.as_view(), name='round-list'),
     # url(r'^games/(?P<pk>[0-9]+)/rounds/(?P<pk>[0-9]+)$', round_views.RoundDetail.as_view(), name='round-detail'),

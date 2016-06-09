@@ -7,7 +7,7 @@ from dixit.api.serializers.round import RoundListSerializer
 from dixit.api.serializers.player import PlayerScoreSerializer
 
 
-class GameListSerializer(serializers.HyperlinkedModelSerializer):
+class GameBaseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Base serializer for Game objects.
     """
@@ -25,11 +25,13 @@ class GameListSerializer(serializers.HyperlinkedModelSerializer):
         model = Game
 
 
-class GameListSerializer(GameListSerializer):
+class GameListSerializer(GameBaseSerializer):
     """
     Serializes a Game object in list mode
     """
-    class Meta(GameListSerializer.Meta):
+
+    class Meta(GameBaseSerializer.Meta):
+        model = Game
         fields = ('id', 'name', 'status', 'current_round', )
 
 
@@ -41,11 +43,11 @@ class GameCreateSerializer(serializers.Serializer):
     player_name = serializers.CharField(max_length=64)
 
 
-class GameRetrieveSerializer(GameListSerializer):
+class GameRetrieveSerializer(GameBaseSerializer):
     """
     Serializes a Game object with its full data
     """
     rounds = RoundListSerializer(many=True, read_only=True)
 
-    class Meta(GameListSerializer.Meta):
+    class Meta(GameBaseSerializer.Meta):
         fields = ('id', 'name', 'status', 'rounds', 'scoreboard', )
