@@ -39,3 +39,13 @@ class Player(models.Model):
         if not self.token:
             self.token = Player.generate_token()
         return super().save(*args, **kwargs)
+
+    def _pick_card(self):
+        """
+        helper method to ease testing.
+        Returns the first card in the hand
+        """
+        hand = self.cards.all()
+        if hand.count():
+            return hand[0]
+        return None

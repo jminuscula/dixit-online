@@ -24,6 +24,8 @@ class CardManager(models.Manager):
         return self.all().exclude(played_cards | dealt_cards | system_cards)
 
     def played_for_round(self, game_round):
+        from dixit.game.models import Play
+
         plays = Play.objects.filter(game_round=game_round)
         return self.filter(plays__in=plays)
 

@@ -6,6 +6,7 @@ from django.db import models
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
 
+from dixit import settings
 from dixit.game.exceptions import GameDeckExhausted, GameRoundIncomplete
 
 
@@ -90,13 +91,18 @@ class Game(models.Model):
         return game
 
     def add_player(self, player_name):
+        """
+        Adds a new player to the game and deals cards if a round is available
+        """
         from dixit.game.models import Player
+        from dixit.game.models.round import RoundStatus
 
-        order = self.players.count() + 1
+        order = self.players.count()
         player = Player(game=self, name=player_name, order=order)
         player.save()
 
-        self.current_round.deal()
+        if self.current_round and self.current_round.status == RoundStatus.NEW:
+            self.current_round.deal()
 
         return player
 
@@ -106,11 +112,15 @@ class Game(models.Model):
         """
         from dixit.game.models import Player, Round
 
+        nplayers = self.players.count()
+        if nplayers == 0:
+            return None
+
         if not self.current_round:
             number, turn = 0, 0
         else:
             number = self.current_round.number + 1
-            turn = (self.current_round.turn.order + 1) % self.players.count()
+            turn = (self.current_round.turn.order + 1) % nplayers
 
         player = Player.objects.get(game=self, order=turn)
         game_round = Round(game=self, number=number, turn=player)
@@ -127,8 +137,17 @@ class Game(models.Model):
         """
         Closes the current round and updates the scoring. It also updates the card's
         description based on the performance of the story and the players guesses.
+
+        The scoring works as follows:
+            - The storyteller gets GAME_STORY_SCORE points if at least one, but not
+              all players vote for the story card
+            - The players get GAME_GUESS_SCORE points if they guess the story card
+            - The players get GAME_CONFUSED_GUESS_SCORE points for each other player
+              that chooses their card
+            - The players get GAME_MAX_ROUND_SCORE maximum points
         """
         from dixit.game.models import Play
+        from dixit.game.models.round import RoundStatus
 
         # TODO:
         # Update cards descriptions
@@ -141,32 +160,29 @@ class Game(models.Model):
         game_round = self.current_round
         storyteller = self.storyteller
 
-        try:
-            story_play = Play.objects.get(game_round=game_round, player=storyteller)
-            story_card = story_play.card_provided
-        except ObjectDoesNotExist:
-            raise GameRoundIncomplete('storyteller needs to choose a card')
+        if game_round.status != RoundStatus.COMPLETE:
+            raise GameRoundIncomplete('still waiting for players')
 
-        plays = Play.objects.filter(game_round=game_round).exclude(player=storyteller)
-        if not all(p.card_chosen for p in players_plays):
-            raise GameRoundIncomplete('round has pending players')
+        plays = game_round.plays.all()
+        players_plays = plays.exclude(player=storyteller)
 
-        scores = defaultdict(lambda x: 0)
-        guesses = {p.player: False for p in plays}
+        story_card = plays.get(player=storyteller).card_provided
+        scores = defaultdict(lambda: 0)
+        guesses = {p.player: 0 for p in players_plays}
 
-        for play in plays:
+        for play in players_plays:
             if play.card_chosen == story_card:
                 scores[play.player] += settings.GAME_GUESS_SCORE
                 guesses[play.player] = True
             else:
-                chosen_play = Play.objects.get(card=play.card_chosen, game_round=game_round)
-                scores[chosen_play.player] += 1
+                chosen_play = plays.get(card_provided=play.card_chosen, game_round=game_round)
+                scores[chosen_play.player] += settings.GAME_CONFUSED_GUESS_SCORE
 
-        if not all(guesses.values()):
+        if any(guesses.values()) and not all(guesses.values()):
             scores[storyteller] = settings.GAME_STORY_SCORE
 
         for player, score in scores.items():
-            player.score += min(GAME_MAX_ROUND_SCORE, score)
+            player.score += min(settings.GAME_MAX_ROUND_SCORE, score)
             player.save()
 
         return self
