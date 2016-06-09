@@ -1,11 +1,19 @@
 
+import enum
 from collections import defaultdict
 
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
 
-from dixit.game.exceptions import GameRoundIncomplete
+from dixit.game.exceptions import GameDeckExhausted, GameRoundIncomplete
+
+
+class GameStatus(enum.Enum):
+    NEW = 'new'
+    ONGOING = 'ongoing'
+    FINISHED = 'finished'
+    ABANDONED = 'abandoned'
 
 
 class Game(models.Model):
@@ -20,14 +28,6 @@ class Game(models.Model):
     all players but one quit before the game is over, it's marked as `abandoned`
     """
 
-    STATUS = (
-        ('new', 'new'),
-        ('ongoing', 'ongoing'),
-        ('finished', 'finished'),
-        ('abandoned', 'abandoned')
-    )
-
-    status = models.CharField(max_length=64, choices=STATUS, default='new')
     name = models.CharField(max_length=64)
     created_on = models.DateTimeField(auto_now_add=True)
 
@@ -37,6 +37,24 @@ class Game(models.Model):
 
         ordering = ('-created_on', )
 
+
+    @property
+    def status(self):
+        from dixit.game.models.round import RoundStatus
+
+        def all_rounds_complete():
+            return all(r.status == RoundStatus.COMPLETE for r in self.rounds.all())
+
+        if self.players.count() == 0:
+            return GameStatus.ABANDONED
+
+        elif not self.current_round or all_rounds_complete():
+            return GameStatus.FINISHED
+
+        elif self.current_round.number == 0 and self.current_round.status == RoundStatus.NEW:
+            return GameStatus.NEW
+
+        return GameStatus.ONGOING
 
     @property
     def current_round(self):
@@ -96,17 +114,29 @@ class Game(models.Model):
 
         player = Player.objects.get(game=self, order=turn)
         game_round = Round(game=self, number=number, turn=player)
-        game_round.save()
-        game_round.deal()
+
+        try:
+            game_round.deal()
+            game_round.save()
+        except GameDeckExhausted:
+            return None
 
         return game_round
 
     def complete_round(self):
         """
-        Closes the current round and updates the scoring.
-        A new round is added.
+        Closes the current round and updates the scoring. It also updates the card's
+        description based on the performance of the story and the players guesses.
         """
         from dixit.game.models import Play
+
+        # TODO:
+        # Update cards descriptions
+        # Storyteller's card gets story added with confidence 50 as a baseline,
+        # then gets a bonus based on the ratio of players who correctly guessed
+        # the card (eg.: 50 + ((50 / players) * votes))
+        # Player card gets story added with confidence based directly on the
+        # ratio of guesses (eg: (100 / players) * votes)
 
         game_round = self.current_round
         storyteller = self.storyteller
@@ -139,4 +169,4 @@ class Game(models.Model):
             player.score += min(GAME_MAX_ROUND_SCORE, score)
             player.save()
 
-        return self.add_round()
+        return self

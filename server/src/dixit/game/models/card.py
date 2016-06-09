@@ -44,8 +44,13 @@ class Card(models.Model):
         verbose_name_plural = _('cards')
 
     @classmethod
-    def get_for_description(cls, description):
-        pass
+    def get_for_description(cls, available, description):
+        """
+        Returns a card from the available deck based on the accuracy for the
+        provided description.
+        The card is removed from the deck.
+        """
+        # TODO
 
 
 class CardDescription(models.Model):

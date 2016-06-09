@@ -1,12 +1,19 @@
 
+import enum
 import random
 
 from django.db import models
 from django.utils.translation import ugettext as _
 
 from dixit import settings
-from dixit.game.models import Game, Card, Player
+from dixit.game.models import Game, Card, CardDescription, Player
 from dixit.game.exceptions import GameDeckExhausted, GameInvalidPlay
+
+
+class RoundStatus(enum.Enum):
+    NEW = 'new'
+    PENDING = 'pending'
+    COMPLETE = 'complete'
 
 
 class Round(models.Model):
@@ -23,16 +30,9 @@ class Round(models.Model):
     in order to confuse other players.
     """
 
-    STATUS = (
-        ('new', 'new'),
-        ('pending', 'pending'),
-        ('complete', 'complete'),
-    )
-
     game = models.ForeignKey(Game, related_name='rounds')
     number = models.IntegerField(default=0)
     turn = models.ForeignKey(Player)
-    complete = models.CharField(max_length=64, choices=STATUS, default='new')
     card = models.ForeignKey(Card, null=True, related_name='system_round_play')
 
     class Meta:
@@ -46,6 +46,22 @@ class Round(models.Model):
     def __str__(self):
         return "{} ({} of game {})".format(self.id, self.number, self.game.id)
 
+    @property
+    def status(self):
+        plays = self.plays.all()
+
+        if not plays:
+            return RoundStatus.NEW
+
+        # check if there are players pending
+        # if storyteller is the only one who has played, the game is still ongoing
+        # since other players may join the current round.
+        play_status = {p.player: p.complete for p in plays}
+        if not all(play_status.values()) or play_status.keys() == {self.turn}:
+            return RoundStatus.PENDING
+
+        return RoundStatus.COMPLETE
+
     def deal(self):
         """
         Provides the players with cards and chooses the system card for this round.
@@ -55,9 +71,15 @@ class Round(models.Model):
         this method allows us to deal the initial hand to all players.
         """
         cards_available = list(Card.objects.available_for_game(self.game))
-
-        card_deals = { 'system': 1 if not self.card else 0 }
         current_players = self.game.players.all().select_related()
+
+        card_deals = {
+            'system': 1 if not self.card else 0,
+            # if the storyteller is the only one playing, we need to make sure we have
+            # enough cards to deal a joining player.
+            'player': settings.GAME_HAND_SIZE if current_players.count() == 1 else 0
+        }
+
         for player in current_players:
             card_deals[player] = settings.GAME_HAND_SIZE - player.cards.count()
 
@@ -74,6 +96,9 @@ class Round(models.Model):
             player.cards.add(*cards)
 
         if not self.card:
+            # TODO
+            # If the round dealt the system card after the storyteller had given the
+            # description, a smarter choice could me made.
             self.card = get_choice(cards_available)
             return self.save()
 
@@ -106,12 +131,23 @@ class Play(models.Model):
         order_with_respect_to = 'player'
         unique_together = (('game_round', 'player'))
 
+    @property
+    def complete(self):
+        if self.player == self.game_round.turn:
+            return self.card_provided is not None
+        return self.card_chosen is not None
+
+    @classmethod
+    def play_for_round(cls, game_round, player, card, story=None):
+        play = cls(game_round=game_round, player=player)
+        return play.provide_card(card, story)
+
     def provide_card(self, card, story=None):
         """
         Play a card for the current round.
         Storytellers must provide a story when providing a card.
         """
-        if story is None and self.player = self.game_round.turn:
+        if story is None and self.player == self.game_round.turn:
             raise GameInvalidPlay('the storyteller needs to provide a story')
 
         self.card_provided = card
