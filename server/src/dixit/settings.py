@@ -23,7 +23,7 @@ CARD_IMAGES_PATH = os.path.join(BASE_DIR, '../../cards')
 # See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 SECRET_KEY = 'eo73+@(#4%a+uby-9!-_@$%wr%o047%rneii*bu@5nfl@k4t-!'
-TOKEN_LENGHT = 16
+TOKEN_LENGTH = 16
 
 
 DEBUG = True

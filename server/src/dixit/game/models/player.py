@@ -18,7 +18,7 @@ class Player(models.Model):
     """
     game = models.ForeignKey(Game, related_name='players')
     owner = models.BooleanField(default=False)
-    name = models.CharField(max_length=64)
+    name = models.CharField(max_length=64, blank=False)
     token = models.CharField(max_length=64)
     score = models.IntegerField(default=0)
     order = models.IntegerField()
@@ -33,7 +33,7 @@ class Player(models.Model):
 
     @staticmethod
     def generate_token():
-        return binascii.hexlify(os.urandom(settings.TOKEN_LENGHT))
+        return binascii.hexlify(os.urandom(settings.TOKEN_LENGTH))
 
     def save(self, *args, **kwargs):
         if not self.token:
