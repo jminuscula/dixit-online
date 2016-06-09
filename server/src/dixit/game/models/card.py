@@ -27,7 +27,13 @@ class CardManager(models.Manager):
         from dixit.game.models import Play
 
         plays = Play.objects.filter(game_round=game_round)
-        return self.filter(plays__in=plays)
+        return self.filter(Q(plays__in=plays) | Q(id=game_round.card.id))
+
+    def chosen_for_round(self, game_round):
+        from dixit.game.models import Play
+
+        plays = Play.objects.filter(game_round=game_round)
+        return self.filter(chosen__in=plays)
 
 
 class Card(models.Model):

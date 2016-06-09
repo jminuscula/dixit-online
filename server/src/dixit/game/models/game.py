@@ -1,6 +1,5 @@
 
 import enum
-from collections import defaultdict
 
 from django.db import models
 from django.utils.translation import ugettext as _
@@ -97,8 +96,7 @@ class Game(models.Model):
         from dixit.game.models import Player
         from dixit.game.models.round import RoundStatus
 
-        order = self.players.count()
-        player = Player(game=self, name=player_name, order=order)
+        player = Player(game=self, name=player_name)
         player.save()
 
         if self.current_round and self.current_round.status == RoundStatus.NEW:
@@ -133,56 +131,12 @@ class Game(models.Model):
 
         return game_round
 
-    def complete_round(self):
+    def next_round(self):
         """
-        Closes the current round and updates the scoring. It also updates the card's
-        description based on the performance of the story and the players guesses.
-
-        The scoring works as follows:
-            - The storyteller gets GAME_STORY_SCORE points if at least one, but not
-              all players vote for the story card
-            - The players get GAME_GUESS_SCORE points if they guess the story card
-            - The players get GAME_CONFUSED_GUESS_SCORE points for each other player
-              that chooses their card
-            - The players get GAME_MAX_ROUND_SCORE maximum points
+        Closes the current round, which updates the scoring, and adds a new round.
         """
-        from dixit.game.models import Play
-        from dixit.game.models.round import RoundStatus
-
-        # TODO:
-        # Update cards descriptions
-        # Storyteller's card gets story added with confidence 50 as a baseline,
-        # then gets a bonus based on the ratio of players who correctly guessed
-        # the card (eg.: 50 + ((50 / players) * votes))
-        # Player card gets story added with confidence based directly on the
-        # ratio of guesses (eg: (100 / players) * votes)
-
-        game_round = self.current_round
-        storyteller = self.storyteller
-
-        if game_round.status != RoundStatus.COMPLETE:
-            raise GameRoundIncomplete('still waiting for players')
-
-        plays = game_round.plays.all()
-        players_plays = plays.exclude(player=storyteller)
-
-        story_card = plays.get(player=storyteller).card_provided
-        scores = defaultdict(lambda: 0)
-        guesses = {p.player: 0 for p in players_plays}
-
-        for play in players_plays:
-            if play.card_chosen == story_card:
-                scores[play.player] += settings.GAME_GUESS_SCORE
-                guesses[play.player] = True
-            else:
-                chosen_play = plays.get(card_provided=play.card_chosen, game_round=game_round)
-                scores[chosen_play.player] += settings.GAME_CONFUSED_GUESS_SCORE
-
-        if any(guesses.values()) and not all(guesses.values()):
-            scores[storyteller] = settings.GAME_STORY_SCORE
-
-        for player, score in scores.items():
-            player.score += min(settings.GAME_MAX_ROUND_SCORE, score)
-            player.save()
-
-        return self
+        try:
+            self.current_round.close()
+        except GameRoundIncomplete:
+            return None
+        return self.add_round()

@@ -21,7 +21,7 @@ class Player(models.Model):
     name = models.CharField(max_length=64)
     token = models.CharField(max_length=64)
     score = models.IntegerField(default=0)
-    order = models.IntegerField(default=0)
+    order = models.IntegerField()
     cards = models.ManyToManyField(Card, related_name='played_by')
 
     class Meta:
@@ -38,6 +38,8 @@ class Player(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = Player.generate_token()
+        if not self.order:
+            self.order = self.game.players.count()
         return super().save(*args, **kwargs)
 
     def _pick_card(self):

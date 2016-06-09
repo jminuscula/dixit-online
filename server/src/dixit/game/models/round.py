@@ -1,13 +1,15 @@
 
 import enum
 import random
+from collections import defaultdict
 
 from django.db import models
+from django.core.exceptions import ObjectDoesNotExist
 from django.utils.translation import ugettext as _
 
 from dixit import settings
 from dixit.game.models import Game, Card, CardDescription, Player
-from dixit.game.exceptions import GameDeckExhausted, GameInvalidPlay
+from dixit.game.exceptions import GameDeckExhausted, GameInvalidPlay, GameRoundIncomplete
 
 
 class RoundStatus(enum.Enum):
@@ -102,6 +104,64 @@ class Round(models.Model):
             self.card = get_choice(cards_available)
             return self.save()
 
+    def close(self):
+        """
+        Calculates the scoring of this round and removes the cards from the player's
+        hands.
+
+        It also updates the card's description based on the performance of the story
+        and the players guesses.
+
+        The scoring works as follows:
+            - The storyteller gets GAME_STORY_SCORE points if at least one, but not
+              all players vote for the story card
+            - The players get GAME_GUESS_SCORE points if they guess the story card
+            - The players get GAME_CONFUSED_GUESS_SCORE points for each other player
+              that chooses their card
+            - The players get GAME_MAX_ROUND_SCORE maximum points
+        """
+        from dixit.game.models import Play
+        from dixit.game.models.round import RoundStatus
+
+        if self.status != RoundStatus.COMPLETE:
+            raise GameRoundIncomplete('still waiting for players')
+
+        plays = self.plays.all()
+        players_plays = plays.exclude(player=self.turn)
+
+        story_card = plays.get(player=self.turn).card_provided
+        scores = defaultdict(lambda: 0)
+        guesses = {p.player: 0 for p in players_plays}
+
+        for play in players_plays:
+            if play.card_chosen == story_card:
+                scores[play.player] += settings.GAME_GUESS_SCORE
+                guesses[play.player] = True
+            else:
+                chosen_play = plays.get(card_provided=play.card_chosen, game_round=self)
+                scores[chosen_play.player] += settings.GAME_CONFUSED_GUESS_SCORE
+
+            play.player.cards.remove(play.card_provided)
+        self.turn.cards.remove(story_card)
+
+        if any(guesses.values()) and not all(guesses.values()):
+            scores[self.turn] = settings.GAME_STORY_SCORE
+
+        for player, score in scores.items():
+            player.score += min(settings.GAME_MAX_ROUND_SCORE, score)
+            player.save()
+
+        # TODO:
+        # Update cards descriptions
+        # Storyteller's card gets story added with confidence 50 as a baseline,
+        # then gets a bonus based on the ratio of players who correctly guessed
+        # the card (eg.: 50 + ((50 / players) * votes))
+        # Player card gets story added with confidence based directly on the
+        # ratio of guesses (eg: (100 / players) * votes)
+
+        return self
+
+
 
 class Play(models.Model):
     """
@@ -150,6 +210,15 @@ class Play(models.Model):
         if story is None and self.player == self.game_round.turn:
             raise GameInvalidPlay('the storyteller needs to provide a story')
 
+        if self.player != self.game_round.turn:
+            try:
+                self.game_round.plays.get(player=self.game_round.turn)
+            except ObjectDoesNotExist:
+                raise GameInvalidPlay('can not provide a card without a story first')
+
+        if Card.objects.chosen_for_round(self.game_round).count() >= 1:
+            raise GameInvalidPlay('can not change the card, voting has started')
+
         self.card_provided = card
         self.save()
 
@@ -167,7 +236,8 @@ class Play(models.Model):
             raise GameInvalidPlay('player can not choose their own card')
 
         round_cards = set(Card.objects.played_for_round(self.game_round))
-        if len(round_cards) != self.game_round.game.players.count():
+        # account for the system card
+        if len(round_cards) - 1 != self.game_round.game.players.count():
             raise GameInvalidPlay('not all players have provided a card yet')
 
         if card not in round_cards:
