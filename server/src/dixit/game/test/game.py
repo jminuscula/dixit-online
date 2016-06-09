@@ -12,8 +12,7 @@ class GameTest(TestCase):
     fixtures = ['game_testcards.json', ]
 
     def setUp(self):
-        self.game = Game(name='test')
-        self.game.save()
+        self.game = Game.objects.create(name='test')
 
     def test_game_can_add_player(self):
         self.assertEqual(self.game.players.count(), 0)

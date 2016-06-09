@@ -38,7 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
+    'rest_framework',
+
     'dixit.game',
+    'dixit.api',
 ]
 
 MIDDLEWARE_CLASSES = [

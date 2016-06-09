@@ -137,8 +137,7 @@ class RoundTest(TestCase):
         max_players = Card.objects.count() // (settings.GAME_HAND_SIZE + 1)
 
         for i in range(max_players + 1):
-            p = Player(game=self.game, name='player_{}'.format(i))
-            p.save()
+            Player.objects.create(game=self.game, name='player_{}'.format(i))
 
         new_round = Round(game=self.game, number=self.current.number + 1, turn=self.current.turn)
         with self.assertRaises(GameDeckExhausted):

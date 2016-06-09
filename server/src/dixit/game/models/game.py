@@ -80,11 +80,8 @@ class Game(models.Model):
         """
         from dixit.game.models import Player, Round
 
-        game = cls(name=name)
-        game.save()
-
-        player = Player(game=game, name=player_name, owner=True)
-        player.save()
+        game = cls.objects.create(name=name)
+        player = Player.objects.create(game=game, name=player_name, owner=True)
 
         game.add_round()
         return game
@@ -96,9 +93,7 @@ class Game(models.Model):
         from dixit.game.models import Player
         from dixit.game.models.round import RoundStatus
 
-        player = Player(game=self, name=player_name)
-        player.save()
-
+        player = Player.objects.create(game=self, name=player_name)
         if self.current_round and self.current_round.status == RoundStatus.NEW:
             self.current_round.deal()
 
