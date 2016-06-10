@@ -5,14 +5,17 @@ from collections import defaultdict
 
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
+from django.dispatch import receiver
+from django.db.models.signals import post_save
 from django.utils.translation import ugettext as _
 
 from dixit import settings
+from dixit.utils import ChoicesEnum
 from dixit.game.models import Game, Card, CardDescription, Player
 from dixit.game.exceptions import GameDeckExhausted, GameInvalidPlay, GameRoundIncomplete
 
 
-class RoundStatus(enum.Enum):
+class RoundStatus(ChoicesEnum):
     NEW = 'new'
     PENDING = 'pending'
     COMPLETE = 'complete'
@@ -33,6 +36,7 @@ class Round(models.Model):
     """
 
     game = models.ForeignKey(Game, related_name='rounds')
+    status = models.CharField(max_length=16, default='new', choices=RoundStatus.choices())
     number = models.IntegerField(default=0)
     turn = models.ForeignKey(Player)
     card = models.ForeignKey(Card, null=True, related_name='system_round_play')
@@ -48,21 +52,24 @@ class Round(models.Model):
     def __str__(self):
         return "{} ({} of game {})".format(self.id, self.number, self.game.id)
 
-    @property
-    def status(self):
+    def update_status(self):
         plays = self.plays.all()
 
+        status = RoundStatus.COMPLETE
         if not plays:
-            return RoundStatus.NEW
+            status = RoundStatus.NEW
 
-        # check if there are players pending
-        # if storyteller is the only one who has played, the game is still ongoing
-        # since other players may join the current round.
-        play_status = {p.player: p.complete for p in plays}
-        if not all(play_status.values()) or play_status.keys() == {self.turn}:
-            return RoundStatus.PENDING
+        else:
+            # check if there are players pending
+            # if storyteller is the only one who has played, the game is still ongoing
+            # since other players may join the current round.
+            play_status = {p.player: p.complete for p in plays}
+            if not all(play_status.values()) or play_status.keys() == {self.turn}:
+                status = RoundStatus.PENDING
 
-        return RoundStatus.COMPLETE
+        if self.status != status:
+            self.status = status
+            return self.save(update_fields=('status', ))
 
     def deal(self):
         """
@@ -247,3 +254,8 @@ class Play(models.Model):
         self.save()
 
         return self
+
+
+@receiver(post_save, sender='game.Play')
+def update_status(sender, instance, *args, **kwargs):
+    return instance.game_round.update_status()

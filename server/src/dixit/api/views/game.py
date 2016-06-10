@@ -21,10 +21,10 @@ class GameList(generics.ListCreateAPIView):
         return GameListSerializer
 
     def get_queryset(self):
-        # TODO
-        # Filter Games by status
         qs = Game.objects.all()
         status = self.request.query_params.get('status', None)
+        if status is not None:
+            return qs.filter(status=status)
         return qs
 
     def create(self, request, *args, **kwargs):

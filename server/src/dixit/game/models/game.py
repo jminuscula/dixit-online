@@ -1,15 +1,16 @@
 
-import enum
-
 from django.db import models
+from django.dispatch import receiver
+from django.db.models.signals import post_save, post_delete
 from django.utils.translation import ugettext as _
 from django.core.exceptions import ObjectDoesNotExist
 
 from dixit import settings
+from dixit.utils import ChoicesEnum
 from dixit.game.exceptions import GameDeckExhausted, GameRoundIncomplete
 
 
-class GameStatus(enum.Enum):
+class GameStatus(ChoicesEnum):
     NEW = 'new'
     ONGOING = 'ongoing'
     FINISHED = 'finished'
@@ -29,6 +30,7 @@ class Game(models.Model):
     """
 
     name = models.CharField(max_length=64)
+    status = models.CharField(max_length=16, default='new', choices=GameStatus.choices())
     created_on = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -37,24 +39,27 @@ class Game(models.Model):
 
         ordering = ('-created_on', )
 
-
-    @property
-    def status(self):
+    def update_status(self):
         from dixit.game.models.round import RoundStatus
 
         def all_rounds_complete():
             return all(r.status == RoundStatus.COMPLETE for r in self.rounds.all())
 
         if self.players.count() == 0:
-            return GameStatus.ABANDONED
+            status = GameStatus.ABANDONED
 
         elif not self.current_round or all_rounds_complete():
-            return GameStatus.FINISHED
+            status = GameStatus.FINISHED
 
         elif self.current_round.number == 0 and self.current_round.status == RoundStatus.NEW:
-            return GameStatus.NEW
+            status = GameStatus.NEW
 
-        return GameStatus.ONGOING
+        else:
+            status = GameStatus.ONGOING
+
+        if self.status != status:
+            self.status = status
+            return self.save(update_fields=('status', ))
 
     @property
     def current_round(self):
@@ -135,3 +140,9 @@ class Game(models.Model):
         except GameRoundIncomplete:
             return None
         return self.add_round()
+
+
+@receiver(post_save, sender='game.Round')
+@receiver(post_delete, sender='game.Player')
+def update_game_status(sender, instance, *args, **kwargs):
+    return instance.game.update_status()

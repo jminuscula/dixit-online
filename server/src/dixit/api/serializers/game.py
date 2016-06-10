@@ -2,7 +2,6 @@
 from rest_framework import serializers
 
 from dixit.game.models import Game
-from dixit.api.serializers.fields import StatusField
 from dixit.api.serializers.round import RoundListSerializer
 from dixit.api.serializers.player import PlayerScoreSerializer
 
@@ -11,7 +10,6 @@ class GameBaseSerializer(serializers.HyperlinkedModelSerializer):
     """
     Base serializer for Game objects.
     """
-    status = StatusField(read_only=True)
 
     current_round = serializers.SerializerMethodField()
     def get_current_round(self, game):
