@@ -29,10 +29,13 @@ class GameListSerializer(GameBaseSerializer):
     """
     Serializes a Game object in list mode
     """
+    n_players = serializers.SerializerMethodField()
+    def get_n_players(self, game):
+        return game.players.count()
 
     class Meta(GameBaseSerializer.Meta):
         model = Game
-        fields = ('id', 'name', 'status', 'current_round', )
+        fields = ('id', 'name', 'status', 'n_players', 'current_round', )
 
 
 class GameCreateSerializer(serializers.Serializer):
