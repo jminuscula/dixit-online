@@ -36,7 +36,7 @@ class Round(models.Model):
     """
 
     game = models.ForeignKey(Game, related_name='rounds')
-    number = models.IntegerField()  # (game, number form pk together)
+    number = models.IntegerField(default=0)  # (game, number form pk together)
     status = models.CharField(max_length=16, default='new', choices=RoundStatus.choices())
     turn = models.ForeignKey(Player)
     card = models.ForeignKey(Card, null=True, related_name='system_round_play')

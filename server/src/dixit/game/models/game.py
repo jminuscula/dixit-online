@@ -123,12 +123,8 @@ class Game(models.Model):
         player = Player.objects.get(game=self, number=turn)
         game_round = Round(game=self, number=number, turn=player)
 
-        try:
-            game_round.deal()
-            game_round.save()
-        except GameDeckExhausted:
-            return None
-
+        game_round.deal()
+        game_round.save()
         return game_round
 
     def next_round(self):

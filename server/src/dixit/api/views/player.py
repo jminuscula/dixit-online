@@ -46,9 +46,8 @@ class PlayerRetrieve(generics.RetrieveDestroyAPIView):
 
     model = Player
     serializer_class = PlayerSerializer
-    lookup_url_kwarg = 'player_pk'
 
     def get_object(self):
         game_pk = self.kwargs['game_pk']
-        player_pk = self.kwargs['player_pk']
-        return get_object_or_404(Player, game=game_pk, pk=player_pk)
+        number = self.kwargs['player_number']
+        return get_object_or_404(Player, game=game_pk, number=number)

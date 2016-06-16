@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 
 from dixit.game.models import Game
+from dixit.game.exceptions import GameDeckExhausted
 from dixit.api.serializers.game import GameListSerializer, GameCreateSerializer, GameRetrieveSerializer
 from dixit.api.serializers.round import RoundListSerializer
 
@@ -32,7 +33,10 @@ class GameList(generics.ListCreateAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        game = Game.new_game(name=request.data['name'], player_name=request.data['player_name'])
+        try:
+            game = Game.new_game(name=request.data['name'], player_name=request.data['player_name'])
+        except GameDeckExhausted:
+            return Response({'detail': 'can not create a game: no cards avaliable.'}, status=status.HTTP_403_FORBIDDEN)
         data = GameRetrieveSerializer(game).data
         return Response(data, status=status.HTTP_201_CREATED)
 

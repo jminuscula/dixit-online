@@ -5,7 +5,7 @@ from dixit import settings
 from dixit.game.models.game import Game, GameStatus
 from dixit.game.models.round import Play
 from dixit.game.models.card import Card
-from dixit.game.exceptions import GameRoundIncomplete
+from dixit.game.exceptions import GameDeckExhausted, GameRoundIncomplete
 
 
 class GameTest(TestCase):
@@ -43,9 +43,10 @@ class GameTest(TestCase):
         for i in range(nplayers):
             self.game.add_player('player{}'.format(i))
 
-        self.game.add_round()
-        self.assertEqual(self.game.rounds.count(), 0)
-        self.assertTrue(self.game.current_round is None)
+        with self.assertRaises(GameDeckExhausted):
+            self.game.add_round()
+            self.assertEqual(self.game.rounds.count(), 0)
+            self.assertTrue(self.game.current_round is None)
 
     def test_game_deals_new_player_when_round_is_added(self):
         storyteller = self.game.add_player('storyteller')
