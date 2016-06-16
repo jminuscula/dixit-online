@@ -17,7 +17,7 @@ class Player(models.Model):
     playing a round or abandoning.
     """
     game = models.ForeignKey(Game, related_name='players')
-    number = models.IntegerField()  # (game, number form pk together)
+    number = models.IntegerField(default=0)  # (game, number form pk together)
     owner = models.BooleanField(default=False)
     name = models.CharField(max_length=64, blank=False)
     token = models.CharField(max_length=64)
