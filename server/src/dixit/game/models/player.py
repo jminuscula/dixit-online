@@ -17,19 +17,19 @@ class Player(models.Model):
     playing a round or abandoning.
     """
     game = models.ForeignKey(Game, related_name='players')
+    number = models.IntegerField()  # (game, number form pk together)
     owner = models.BooleanField(default=False)
     name = models.CharField(max_length=64, blank=False)
     token = models.CharField(max_length=64)
     score = models.IntegerField(default=0)
-    order = models.IntegerField()
     cards = models.ManyToManyField(Card, related_name='played_by')
 
     class Meta:
         verbose_name = _('player')
         verbose_name_plural = _('player')
 
-        ordering = ('order', )
-        unique_together = (('game', 'name'), ('game', 'order'))
+        ordering = ('number', )
+        unique_together = (('game', 'name'), ('game', 'number'))
 
     @staticmethod
     def generate_token():
@@ -38,8 +38,8 @@ class Player(models.Model):
     def save(self, *args, **kwargs):
         if not self.token:
             self.token = Player.generate_token()
-        if not self.order:
-            self.order = self.game.players.count()
+        if not self.number:
+            self.number = self.game.players.count()
         return super().save(*args, **kwargs)
 
     def _pick_card(self):

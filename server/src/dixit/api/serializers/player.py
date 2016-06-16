@@ -8,7 +8,7 @@ class PlayerSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Player
-        fields = ('id', 'name', 'score', 'order')
+        fields = ('id', 'name', 'score', 'number')
 
 
 class PlayerCreateSerializer(serializers.Serializer):

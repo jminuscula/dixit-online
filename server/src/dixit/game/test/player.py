@@ -19,7 +19,7 @@ class PlayerTest(TestCase):
 
     def test_player_order_is_number_of_players(self):
         player = Player.objects.create(game=self.game, name='player1')
-        self.assertEqual(player.order, 0)
+        self.assertEqual(player.number, 0)
 
         player = Player.objects.create(game=self.game, name='player2')
-        self.assertEqual(player.order, 1)
+        self.assertEqual(player.number, 1)

@@ -118,9 +118,9 @@ class Game(models.Model):
             number, turn = 0, 0
         else:
             number = self.current_round.number + 1
-            turn = (self.current_round.turn.order + 1) % nplayers
+            turn = (self.current_round.turn.number + 1) % nplayers
 
-        player = Player.objects.get(game=self, order=turn)
+        player = Player.objects.get(game=self, number=turn)
         game_round = Round(game=self, number=number, turn=player)
 
         try:

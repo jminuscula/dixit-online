@@ -36,8 +36,8 @@ class Round(models.Model):
     """
 
     game = models.ForeignKey(Game, related_name='rounds')
+    number = models.IntegerField()  # (game, number form pk together)
     status = models.CharField(max_length=16, default='new', choices=RoundStatus.choices())
-    number = models.IntegerField(default=0)
     turn = models.ForeignKey(Player)
     card = models.ForeignKey(Card, null=True, related_name='system_round_play')
 
@@ -46,7 +46,7 @@ class Round(models.Model):
         verbose_name_plural = _('round')
 
         ordering = ('number', )
-        unique_together = (('game', 'number'))
+        unique_together = (('game', 'number'), )
 
 
     def __str__(self):
@@ -196,7 +196,7 @@ class Play(models.Model):
         verbose_name_plural = _('play')
 
         order_with_respect_to = 'player'
-        unique_together = (('game_round', 'player'))
+        unique_together = (('game_round', 'player'), )
 
     @property
     def complete(self):
