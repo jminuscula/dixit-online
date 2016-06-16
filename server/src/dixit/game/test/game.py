@@ -120,8 +120,13 @@ class GameTest(TestCase):
 
         self.assertEqual(self.game.status, GameStatus.FINISHED)
 
-    def test_game_without_players_is_abandoned(self):
+    def test_new_game_is_new(self):
         g = Game(name='test')
+        self.assertEqual(g.status, GameStatus.NEW)
+
+    def test_started_game_without_players_is_abandoned(self):
+        g = Game.new_game(name='test', player_name='storyteller')
+        g.players.all().delete()
         self.assertEqual(g.status, GameStatus.ABANDONED)
 
     def test_bootstrapped_game_has_player_and_round(self):
