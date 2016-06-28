@@ -31,6 +31,9 @@ class Player(models.Model):
         ordering = ('number', )
         unique_together = (('game', 'name'), ('game', 'number'))
 
+    def __str__(self):
+        return "{}, {} of <Game {}: '{}'>".format(self.name, self.number, self.game.id, self.game.name)
+
     @staticmethod
     def generate_token():
         return binascii.hexlify(os.urandom(settings.TOKEN_LENGTH))

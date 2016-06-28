@@ -14,13 +14,18 @@ urlpatterns = [
     url(r'^game/(?P<game_pk>[0-9]+)/$',
         game_views.GameRetrieve.as_view(), name='game-detail'),
 
-    url(r'^game/(?P<game_pk>[0-9]+)/round$', round_views.RoundList.as_view(), name='round-list'),
-    url(r'^game/(?P<game_pk>[0-9]+)/round/(?P<round_number>[0-9]+)$', round_views.RoundRetrieve.as_view(), name='round-detail'),
-
     url(r'^game/(?P<game_pk>[0-9]+)/player/$',
         player_views.PlayerList.as_view(), name='player-list'),
     url(r'^game/(?P<game_pk>[0-9]+)/player/(?P<player_number>[0-9]+)/$',
         player_views.PlayerRetrieve.as_view(), name='player-detail'),
+
+    url(r'^game/(?P<game_pk>[0-9]+)/round$',
+        round_views.RoundList.as_view(), name='round-list'),
+    url(r'^game/(?P<game_pk>[0-9]+)/round/(?P<round_number>[0-9]+)$',
+        round_views.RoundRetrieve.as_view(), name='round-detail'),
+    url(r'^game/(?P<game_pk>[0-9]+)/round/(?P<round_number>[0-9]+)/play$',
+        round_views.PlayList.as_view(), name='play-list'),
+
 ]
 
 urlpatterns = format_suffix_patterns(urlpatterns)

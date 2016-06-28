@@ -51,6 +51,9 @@ class Card(models.Model):
         verbose_name = _('card')
         verbose_name_plural = _('cards')
 
+    def __str__(self):
+        return self.name or self.path
+
     @classmethod
     def get_for_description(cls, available, description):
         """

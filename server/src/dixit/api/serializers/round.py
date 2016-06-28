@@ -1,7 +1,7 @@
 
 from rest_framework import serializers
 
-from dixit.game.models import Round
+from dixit.game.models import Game, Round, Player, Play, Card
 from dixit.api.serializers.player import PlayerSerializer
 
 
@@ -14,3 +14,22 @@ class RoundListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Round
         fields = ('id', 'number', 'turn', 'status', )
+
+
+class PlaySerializer(serializers.ModelSerializer):
+    """
+    Serializes a Play object
+    """
+    player = PlayerSerializer()
+
+    class Meta:
+        model = Play
+        fields = ('id', 'player', 'story', )
+
+
+class PlayCreateSerializer(serializers.Serializer):
+    """
+    """
+    story = serializers.CharField(max_length=256, required=False)
+    player = serializers.PrimaryKeyRelatedField(queryset=Player.objects.all())
+    card = serializers.PrimaryKeyRelatedField(queryset=Card.objects.all())

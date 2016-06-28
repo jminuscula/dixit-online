@@ -50,7 +50,7 @@ class Round(models.Model):
 
 
     def __str__(self):
-        return "{} ({} of game {})".format(self.id, self.number, self.game.id)
+        return "{} of <Game {}: '{}'>".format(self.number, self.game.id, self.game.name)
 
     def update_status(self):
         plays = self.plays.all()
@@ -206,6 +206,9 @@ class Play(models.Model):
 
     @classmethod
     def play_for_round(cls, game_round, player, card, story=None):
+        played = Play.objects.filter(game_round=game_round, player=player)
+        if played:
+            raise GameInvalidPlay('player has already played this round')
         play = cls(game_round=game_round, player=player)
         return play.provide_card(card, story)
 
