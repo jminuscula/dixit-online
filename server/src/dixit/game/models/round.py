@@ -182,7 +182,7 @@ class Play(models.Model):
     """
 
     game_round = models.ForeignKey(Round, related_name='plays')
-    player = models.ForeignKey(Player)
+    player = models.ForeignKey(Player, related_name='plays')
 
     # card being played in phase 1
     card_provided = models.ForeignKey(Card, related_name='plays')

@@ -1,5 +1,6 @@
 
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 from dixit import settings
 from dixit.game.models.game import Game
@@ -13,9 +14,12 @@ class PlayTest(TestCase):
     fixtures = ['game_testcards.json', ]
 
     def setUp(self):
-        self.game = Game.new_game(name='test', player_name='storyteller')
+        self.user = User.objects.create(username='test', email='test@localhost', password='test')
+        self.user2 = User.objects.create(username='test2', email='test2@localhost', password='test')
+
+        self.game = Game.new_game(name='test', user=self.user, player_name='storyteller')
         self.current = self.game.current_round
-        self.player2 = self.game.add_player('player2')
+        self.player2 = self.game.add_player(self.user2, 'player2')
 
     def test_play_can_be_performed_for_round(self):
         story_card = self.game.storyteller._pick_card()
@@ -83,10 +87,15 @@ class RoundTest(TestCase):
     fixtures = ['game_testcards.json', ]
 
     def setUp(self):
-        self.game = Game.new_game(name='test', player_name='storyteller')
+        self.user = User.objects.create(username='test', email='test@localhost', password='test')
+        self.user2 = User.objects.create(username='test2', email='test2@localhost', password='test')
+        self.user3 = User.objects.create(username='test3', email='test3@localhost', password='test')
+        self.user4 = User.objects.create(username='test4', email='test4@localhost', password='test')
+
+        self.game = Game.new_game(name='test', user=self.user, player_name='storyteller')
         self.current = self.game.current_round
-        self.player2 = self.game.add_player('player2')
-        self.player3 = self.game.add_player('player3')
+        self.player2 = self.game.add_player(self.user2, 'player2')
+        self.player3 = self.game.add_player(self.user3, 'player3')
 
     def test_round_starts_new(self):
         self.assertEqual(self.current.status, RoundStatus.NEW)
@@ -137,7 +146,10 @@ class RoundTest(TestCase):
         max_players = Card.objects.count() // (settings.GAME_HAND_SIZE + 1)
 
         for i in range(max_players + 1):
-            Player.objects.create(game=self.game, name='player_{}'.format(i))
+            test_username = 'test_n_{}'.format(i)
+            test_email = '{}@localhost'.format(test_username)
+            user = User.objects.create(username=test_username, email=test_email, password='test')
+            Player.objects.create(game=self.game, user=user, name='player_{}'.format(i))
 
         new_round = Round(game=self.game, number=self.current.number + 1, turn=self.current.turn)
         with self.assertRaises(GameDeckExhausted):
@@ -207,7 +219,7 @@ class RoundTest(TestCase):
         self.assertEqual(self.player2.score, settings.GAME_CONFUSED_GUESS_SCORE)
 
     def test_players_score_max_bound(self):
-        player4 = self.game.add_player('player4')
+        player4 = self.game.add_player(self.user4, 'player4')
 
         story_card = self.current.turn._pick_card()
         story_play = Play.play_for_round(self.current, self.current.turn, story_card, 'test')

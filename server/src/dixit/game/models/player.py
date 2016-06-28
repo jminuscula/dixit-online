@@ -4,6 +4,7 @@ import binascii
 
 from django.db import models
 from django.utils.translation import ugettext as _
+from django.contrib.auth.models import User
 
 from dixit import settings
 from dixit.game.models import Game, Card
@@ -17,6 +18,7 @@ class Player(models.Model):
     playing a round or abandoning.
     """
     game = models.ForeignKey(Game, related_name='players')
+    user = models.ForeignKey(User, related_name='players')
     number = models.IntegerField(default=0)  # (game, number form pk together)
     owner = models.BooleanField(default=False)
     name = models.CharField(max_length=64, blank=False)

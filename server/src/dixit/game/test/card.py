@@ -1,5 +1,6 @@
 
 from django.test import TestCase
+from django.contrib.auth.models import User
 
 from dixit import settings
 from dixit.game.models.game import Game, GameStatus
@@ -12,8 +13,9 @@ class CardManagerTest(TestCase):
     fixtures = ['game_testcards.json', ]
 
     def setUp(self):
-        self.game = Game.new_game(name='test', player_name='storyteller')
-        self.player2 = self.game.add_player('player2')
+        self.user = User.objects.create(username='test', email='test@localhost', password='test')
+        self.game = Game.new_game(name='test', user=self.user, player_name='storyteller')
+        self.player2 = self.game.add_player(self.user, 'player2')
 
     def test_can_identified_cards_played_in_a_round(self):
         story_card = self.game.storyteller._pick_card()

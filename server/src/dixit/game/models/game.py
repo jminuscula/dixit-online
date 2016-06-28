@@ -79,26 +79,26 @@ class Game(models.Model):
         return self.current_round.turn
 
     @classmethod
-    def new_game(cls, name, player_name):
+    def new_game(cls, name, user, player_name):
         """
         Bootstraps a new game with a round and a storyteller player
         """
         from dixit.game.models import Player, Round
 
         game = cls.objects.create(name=name)
-        player = Player.objects.create(game=game, name=player_name, owner=True)
+        player = Player.objects.create(game=game, user=user, name=player_name, owner=True)
 
         game.add_round()
         return game
 
-    def add_player(self, player_name):
+    def add_player(self, user, player_name):
         """
         Adds a new player to the game and deals cards if a round is available
         """
         from dixit.game.models import Player
         from dixit.game.models.round import RoundStatus
 
-        player = Player.objects.create(game=self, name=player_name)
+        player = Player.objects.create(game=self, user=user, name=player_name)
         if self.current_round and self.current_round.status == RoundStatus.NEW:
             self.current_round.deal()
 
