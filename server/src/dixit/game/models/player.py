@@ -1,7 +1,4 @@
 
-import os
-import binascii
-
 from django.db import models
 from django.utils.translation import ugettext as _
 from django.contrib.auth.models import User
@@ -17,8 +14,8 @@ class Player(models.Model):
     Players are handed a security token to perform actions in the game, such as
     playing a round or abandoning.
     """
-    game = models.ForeignKey(Game, related_name='players')
     user = models.ForeignKey(User, related_name='players')
+    game = models.ForeignKey(Game, related_name='players')
     number = models.IntegerField(default=0)  # (game, number form pk together)
     owner = models.BooleanField(default=False)
     name = models.CharField(max_length=64, blank=False)
@@ -31,18 +28,12 @@ class Player(models.Model):
         verbose_name_plural = _('player')
 
         ordering = ('number', )
-        unique_together = (('game', 'name'), ('game', 'number'))
+        unique_together = (('game', 'user'), ('game', 'name'), ('game', 'number'))
 
     def __str__(self):
         return "{}, {} of <Game {}: '{}'>".format(self.name, self.number, self.game.id, self.game.name)
 
-    @staticmethod
-    def generate_token():
-        return binascii.hexlify(os.urandom(settings.TOKEN_LENGTH))
-
     def save(self, *args, **kwargs):
-        if not self.token:
-            self.token = Player.generate_token()
         if not self.number:
             self.number = self.game.players.count()
         return super().save(*args, **kwargs)
