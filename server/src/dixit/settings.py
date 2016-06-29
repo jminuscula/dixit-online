@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
+    'dixit.accounts',
     'dixit.game',
     'dixit.api',
 ]
@@ -60,7 +61,9 @@ ROOT_URLCONF = 'dixit.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'dixit/templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -88,6 +91,8 @@ REST_FRAMEWORK = {
         'rest_framework.authentication.SessionAuthentication',
     )
 }
+
+LOGIN_REDIRECT_URL = r'/'
 
 if not DEBUG:
     AUTH_PASSWORD_VALIDATORS = [
