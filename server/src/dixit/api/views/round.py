@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, status
 
@@ -14,19 +15,21 @@ from dixit.api.serializers.round import RoundListSerializer, PlaySerializer, Pla
 
 
 class RoundList(GameObjectMixin, generics.ListAPIView):
-
     model = Round
     serializer_class = RoundListSerializer
+
+    permission_classes = (IsAuthenticated, )
 
     def get_queryset(self):
         return Round.objects.filter(game=self.get_game())
 
 
 class RoundRetrieve(generics.RetrieveAPIView):
-
     model = Round
     serializer_class = RoundListSerializer
     lookup_url_kwarg = 'round_pk'
+
+    permission_classes = (IsAuthenticated, )
 
     def get_object(self):
         game_pk = self.kwargs['game_pk']
@@ -35,8 +38,9 @@ class RoundRetrieve(generics.RetrieveAPIView):
 
 
 class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
-
     model = Play
+
+    permission_classes = (IsAuthenticated, )
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -65,10 +69,11 @@ class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
 
 
 class PlayRetrieve(generics.RetrieveAPIView):
-
     model = Play
     serializer_class = PlaySerializer
     lookup_url_kwarg = 'play_pk'
+
+    permission_classes = (IsAuthenticated, )
 
     def get_object(self):
         game_pk = self.kwargs['game_pk']

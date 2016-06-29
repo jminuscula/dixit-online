@@ -4,6 +4,7 @@ from django.db import IntegrityError
 from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, status
 
@@ -12,9 +13,10 @@ from dixit.api.serializers.player import PlayerSerializer, PlayerCreateSerialize
 
 
 class PlayerList(generics.ListCreateAPIView):
-
     model = Player
     serializer_class = PlayerSerializer
+
+    permission_classes = (IsAuthenticated, )
 
     def _get_game(self):
         return get_object_or_404(Game, pk=self.kwargs['game_pk'])
@@ -43,9 +45,10 @@ class PlayerList(generics.ListCreateAPIView):
 
 
 class PlayerRetrieve(generics.RetrieveDestroyAPIView):
-
     model = Player
     serializer_class = PlayerSerializer
+
+    permission_classes = (IsAuthenticated, )
 
     def get_object(self):
         game_pk = self.kwargs['game_pk']

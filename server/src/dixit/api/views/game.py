@@ -2,6 +2,7 @@
 from django.http import Http404
 
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, status
 
@@ -12,9 +13,10 @@ from dixit.api.serializers.round import RoundListSerializer
 
 
 class GameList(generics.ListCreateAPIView):
-
     model = Game
     lookup_url_kwarg = 'game_pk'
+
+    permission_classes = (IsAuthenticated, )
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -34,7 +36,9 @@ class GameList(generics.ListCreateAPIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         try:
-            game = Game.new_game(name=request.data['name'], player_name=request.data['player_name'])
+            game_name = serializer.validated_data['name']
+            player_name = serializer.validated_data['player_name']
+            game = Game.new_game(name=game_name, user=request.user, player_name=player_name)
         except GameDeckExhausted as exc:
             return Response({'detail': exc.msg}, status=status.HTTP_403_FORBIDDEN)
         data = GameRetrieveSerializer(game).data
@@ -42,7 +46,8 @@ class GameList(generics.ListCreateAPIView):
 
 
 class GameRetrieve(generics.RetrieveAPIView):
-
     serializer_class = GameRetrieveSerializer
     queryset = Game.objects.all()
     lookup_url_kwarg = 'game_pk'
+
+    permission_classes = (IsAuthenticated, )
