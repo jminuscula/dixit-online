@@ -42,7 +42,7 @@ class RoundRetrieve(generics.RetrieveAPIView):
 class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
     model = Play
 
-    permission_classes = (IsAuthenticated, PlayerOwned)
+    permission_classes = (IsAuthenticated, GamePlayer, PlayerOwned)
 
     def get_serializer_class(self):
         if self.request.method == 'POST':

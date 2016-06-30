@@ -55,18 +55,17 @@ class Round(models.Model):
 
     def update_status(self):
         plays = self.plays.all()
-
+        play_status = {p.player: p.complete for p in plays}
         status = RoundStatus.COMPLETE
-        if not plays:
+
+        # if storyteller is the only one who has played, the round is still new
+        # since other players may join
+        if not plays or play_status.keys() == {self.turn, }:
             status = RoundStatus.NEW
 
-        else:
-            # check if there are players pending
-            # if storyteller is the only one who has played, the game is still ongoing
-            # since other players may join the current round.
-            play_status = {p.player: p.complete for p in plays}
-            if not all(play_status.values()) or play_status.keys() == {self.turn, }:
-                status = RoundStatus.PENDING
+        elif not all(play_status.values()):
+            # if any other player has started, round is locked on ongoing
+            status = RoundStatus.PENDING
 
         if self.status != status:
             self.status = status

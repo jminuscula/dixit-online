@@ -32,6 +32,7 @@ class Game(models.Model):
     name = models.CharField(max_length=64)
     status = models.CharField(max_length=16, default='new', choices=GameStatus.choices())
     created_on = models.DateTimeField(auto_now_add=True)
+    current_round = models.ForeignKey('Round', null=True, related_name='current_round')
 
     class Meta:
         verbose_name = _('game')
@@ -60,13 +61,6 @@ class Game(models.Model):
         if self.status != status:
             self.status = status
             return self.save(update_fields=('status', ))
-
-    @property
-    def current_round(self):
-        rounds = self.rounds.all().order_by('-number')
-        if rounds:
-            return rounds[0]
-        return None
 
     def __str__(self):
         return self.name
@@ -102,7 +96,7 @@ class Game(models.Model):
         if self.current_round and self.current_round.status == RoundStatus.NEW:
             # round is new, so player can start immediately
             self.current_round.n_players += 1
-            self.save()
+            self.current_round.save(update_fields=('n_players', ))
 
             self.current_round.deal()
 
@@ -129,6 +123,10 @@ class Game(models.Model):
 
         game_round.deal()
         game_round.save()
+
+        self.current_round = game_round
+        self.save()
+
         return game_round
 
     def next_round(self):

@@ -1,8 +1,10 @@
 
 import random
 from rest_framework import serializers
+from django.core.exceptions import ObjectDoesNotExist
 
 from dixit.game.models import Game, Round, Player, Play, Card
+from dixit.game.models.round import RoundStatus
 from dixit.api.serializers.player import PlayerSerializer
 from dixit.api.serializers.card import CardAnonymousSerializer
 
@@ -27,12 +29,15 @@ class RoundRetrieveSerializer(serializers.ModelSerializer):
     played_cards = serializers.SerializerMethodField()
 
     def get_story(self, game_round):
-        storyteller_play = game_round.plays.get(player=game_round.turn)
+        try:
+            storyteller_play = game_round.plays.get(player=game_round.turn)
+        except ObjectDoesNotExist:
+            return None
         return storyteller_play.story
 
     def get_played_cards(self, game_round):
         # played cards are only available once all players have chosen
-        if game_round.plays.count() != game_round.n_players:
+        if game_round.status == RoundStatus.NEW or game_round.plays.count() < game_round.n_players:
             return []
 
         cards_provided = [play.card_provided for play in game_round.plays.all()]
