@@ -65,7 +65,7 @@ class GameTest(TestCase):
         self.game.add_player(self.user, 'storyteller')
         self.game.add_round()
 
-        player2 = self.game.add_player(self.user, 'player2')
+        player2 = self.game.add_player(self.user2, 'player2')
         self.assertEqual(player2.cards.count(), settings.GAME_HAND_SIZE)
 
     def test_game_doesnt_deal_new_player_when_round_is_not_new(self):

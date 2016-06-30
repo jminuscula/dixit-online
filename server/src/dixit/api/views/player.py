@@ -36,9 +36,11 @@ class PlayerList(generics.ListCreateAPIView):
 
         game = self._get_game()
         try:
-            player = game.add_player(request.data['name'])
-        except IntegrityError:
-            return Response({"name": ["Username already in use"]}, status=status.HTTP_403_FORBIDDEN)
+            player = game.add_player(request.user, request.data['name'])
+        except IntegrityError as exc:
+            if 'user_id' in str(exc):
+                return Response({"detail": 'You are already playing this game'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({"detail": "Username already in use"}, status=status.HTTP_403_FORBIDDEN)
 
         data = PlayerSerializer(player).data
         return Response(data, status=status.HTTP_201_CREATED)

@@ -1,4 +1,5 @@
 
+import random
 from rest_framework import serializers
 
 from dixit.game.models import Game, Round, Player, Play, Card
@@ -30,7 +31,13 @@ class RoundRetrieveSerializer(serializers.ModelSerializer):
         return storyteller_play.story
 
     def get_played_cards(self, game_round):
+        # played cards are only available once all players have chosen
+        if game_round.plays.count() != game_round.n_players:
+            return []
+
         cards_provided = [play.card_provided for play in game_round.plays.all()]
+        cards_provided.append(game_round.card)
+        random.shuffle(cards_provided)
         return CardAnonymousSerializer(cards_provided, many=True).data
 
     class Meta:

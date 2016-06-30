@@ -100,6 +100,10 @@ class Game(models.Model):
 
         player = Player.objects.create(game=self, user=user, name=player_name)
         if self.current_round and self.current_round.status == RoundStatus.NEW:
+            # round is new, so player can start immediately
+            self.current_round.n_players += 1
+            self.save()
+
             self.current_round.deal()
 
         return player
@@ -110,18 +114,18 @@ class Game(models.Model):
         """
         from dixit.game.models import Player, Round
 
-        nplayers = self.players.count()
-        if nplayers == 0:
+        n_players = self.players.count()
+        if n_players == 0:
             return None
 
         if not self.current_round:
             number, turn = 0, 0
         else:
             number = self.current_round.number + 1
-            turn = (self.current_round.turn.number + 1) % nplayers
+            turn = (self.current_round.turn.number + 1) % n_players
 
         player = Player.objects.get(game=self, number=turn)
-        game_round = Round(game=self, number=number, turn=player)
+        game_round = Round(game=self, number=number, turn=player, n_players=n_players)
 
         game_round.deal()
         game_round.save()

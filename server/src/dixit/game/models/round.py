@@ -39,6 +39,7 @@ class Round(models.Model):
     number = models.IntegerField(default=0)  # (game, number form pk together)
     status = models.CharField(max_length=16, default='new', choices=RoundStatus.choices())
     turn = models.ForeignKey(Player)
+    n_players = models.IntegerField(default=1)
     card = models.ForeignKey(Card, null=True, related_name='system_round_play')
 
     class Meta:
@@ -64,7 +65,7 @@ class Round(models.Model):
             # if storyteller is the only one who has played, the game is still ongoing
             # since other players may join the current round.
             play_status = {p.player: p.complete for p in plays}
-            if not all(play_status.values()) or play_status.keys() == {self.turn}:
+            if not all(play_status.values()) or play_status.keys() == {self.turn, }:
                 status = RoundStatus.PENDING
 
         if self.status != status:
@@ -219,6 +220,9 @@ class Play(models.Model):
         """
         if story is None and self.player == self.game_round.turn:
             raise GameInvalidPlay('the storyteller needs to provide a story')
+
+        elif card not in self.player.cards.all():
+            raise GameInvalidPlay('the card is not available to player')
 
         if self.player != self.game_round.turn:
             try:
