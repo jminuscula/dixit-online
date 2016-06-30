@@ -52,3 +52,4 @@ class GameRetrieveSerializer(GameBaseSerializer):
 
     class Meta(GameBaseSerializer.Meta):
         fields = ('id', 'name', 'status', 'rounds', 'scoreboard', )
+        read_only_fields = ('status', )

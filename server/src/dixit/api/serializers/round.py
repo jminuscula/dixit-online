@@ -3,6 +3,7 @@ from rest_framework import serializers
 
 from dixit.game.models import Game, Round, Player, Play, Card
 from dixit.api.serializers.player import PlayerSerializer
+from dixit.api.serializers.card import CardAnonymousSerializer
 
 
 class RoundListSerializer(serializers.ModelSerializer):
@@ -14,6 +15,28 @@ class RoundListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Round
         fields = ('id', 'number', 'turn', 'status', )
+
+
+class RoundRetrieveSerializer(serializers.ModelSerializer):
+    """
+    Serializes a Round object including play information
+    """
+    turn = PlayerSerializer(read_only=True)
+    story = serializers.SerializerMethodField()
+    played_cards = serializers.SerializerMethodField()
+
+    def get_story(self, game_round):
+        storyteller_play = game_round.plays.get(player=game_round.turn)
+        return storyteller_play.story
+
+    def get_played_cards(self, game_round):
+        cards_provided = [play.card_provided for play in game_round.plays.all()]
+        return CardAnonymousSerializer(cards_provided, many=True).data
+
+    class Meta:
+        model = Round
+        fields = ('id', 'number', 'turn', 'status', 'story', 'played_cards')
+
 
 
 class PlaySerializer(serializers.ModelSerializer):
@@ -31,5 +54,4 @@ class PlayCreateSerializer(serializers.Serializer):
     """
     """
     story = serializers.CharField(max_length=256, required=False)
-    player = serializers.PrimaryKeyRelatedField(queryset=Player.objects.all())
     card = serializers.PrimaryKeyRelatedField(queryset=Card.objects.all())
