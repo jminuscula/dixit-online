@@ -41,19 +41,31 @@ class Game(models.Model):
         ordering = ('-created_on', )
 
     def update_status(self):
-        from dixit.game.models.round import RoundStatus
+        """
+        Game status is computed based on its Players and Round statuses.
+        It is updated via a signal each time these change.
+
+        The possible statuses are:
+            - new: the game has no rounds, or it's only round is `new`
+            - ongoing: the game play has a round in `providing` or `voting`
+            - finished: all game rounds are `complete`
+            - abandoned: all players have left the game
+        """
+        from dixit.game.models.round import Round, RoundStatus
 
         def all_rounds_complete():
             return all(r.status == RoundStatus.COMPLETE for r in self.rounds.all())
 
-        if self.players.count() == 0:
+        if (self.rounds.count() == 0 or
+            not self.current_round or
+            self.current_round.number == 0 and self.current_round.status == RoundStatus.NEW):
+            status = GameStatus.NEW
+
+        elif self.players.count() == 0:
             status = GameStatus.ABANDONED
 
-        elif not self.current_round or all_rounds_complete():
+        elif all_rounds_complete():
             status = GameStatus.FINISHED
-
-        elif self.current_round.number == 0 and self.current_round.status == RoundStatus.NEW:
-            status = GameStatus.NEW
 
         else:
             status = GameStatus.ONGOING
@@ -93,11 +105,11 @@ class Game(models.Model):
         from dixit.game.models.round import RoundStatus
 
         player = Player.objects.create(game=self, user=user, name=player_name)
-        if self.current_round and self.current_round.status == RoundStatus.NEW:
-            # round is new, so player can start immediately
+        playable_status = (RoundStatus.NEW, RoundStatus.PROVIDING)
+
+        if self.current_round and self.current_round.status in playable_status:
             self.current_round.n_players += 1
             self.current_round.save(update_fields=('n_players', ))
-
             self.current_round.deal()
 
         return player
@@ -121,13 +133,31 @@ class Game(models.Model):
         player = Player.objects.get(game=self, number=turn)
         game_round = Round(game=self, number=number, turn=player, n_players=n_players)
 
-        game_round.deal()
+        # We need to assign the round first and save second
+        # since the post-save signal will run on game and current_round needs to be set.
+        # Since a model can't be saved with unsaved related object, this is the only order possible
         game_round.save()
-
         self.current_round = game_round
         self.save()
+        game_round.deal()
 
         return game_round
+
+    def update_turn(self, from_player):
+        players = self.players.all().order_by('number')
+        if not players:
+            return
+
+        for turn, p in enumerate(players):
+            if p.number != turn:
+                p.number = turn
+                p.save()
+
+        self.current_round.n_players = len(players)
+        turn = (from_player.number + 1) % len(players)
+        if not self.current_round.turn:
+            self.current_round.turn = turn
+            self.current_round.save(update_fields=('turn', 'n_players'))
 
     def next_round(self):
         """

@@ -16,10 +16,12 @@ class PlayTest(TestCase):
     def setUp(self):
         self.user = User.objects.create(username='test', email='test@localhost', password='test')
         self.user2 = User.objects.create(username='test2', email='test2@localhost', password='test')
+        self.user3 = User.objects.create(username='test3', email='test3@localhost', password='test')
 
         self.game = Game.new_game(name='test', user=self.user, player_name='storyteller')
         self.current = self.game.current_round
         self.player2 = self.game.add_player(self.user2, 'player2')
+        self.player3 = self.game.add_player(self.user3, 'player3')
 
     def test_play_can_be_performed_for_round(self):
         story_card = self.game.storyteller._pick_card()
@@ -48,8 +50,10 @@ class PlayTest(TestCase):
         story_card = self.game.storyteller._pick_card()
         story_play = Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
 
-        card2 = self.player2._pick_card()
-        play2 = Play.play_for_round(self.current, self.player2, card2)
+        play2 = Play.play_for_round(self.current, self.player2, self.player2._pick_card())
+        play3 = Play.play_for_round(self.current, self.player3, self.player3._pick_card())
+
+        self.assertEqual(self.current.status, RoundStatus.VOTING)
         play2.choose_card(story_card)
 
     def test_players_can_not_choose_unplayed_card(self):
@@ -100,17 +104,46 @@ class RoundTest(TestCase):
     def test_round_starts_new(self):
         self.assertEqual(self.current.status, RoundStatus.NEW)
 
-    def test_round_is_pending_when_a_play_is_performed(self):
+    def test_round_is_new_when_only_storyteller_has_played(self):
         story_card = self.game.storyteller._pick_card()
         Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
-        self.assertEqual(self.current.status, RoundStatus.PENDING)
+        self.assertEqual(self.current.status, RoundStatus.NEW)
 
-    def test_round_is_complete_when_all_plays_are_performed(self):
+    def test_round_is_providing_until_all_players_have_provided(self):
         story_card = self.game.storyteller._pick_card()
         Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
 
+        players = self.game.players.exclude(id=self.game.storyteller.id)
+        for player in players[1:]:
+            Play.play_for_round(self.current, player, player._pick_card())
+
+        self.assertEqual(self.current.status, RoundStatus.PROVIDING)
+
+    def test_round_is_voting_when_all_players_have_provided_a_card(self):
+        Play.play_for_round(self.current, self.game.storyteller, self.game.storyteller._pick_card(), 'story')
         players = self.game.players.all().exclude(id=self.game.storyteller.id)
+        for player in players:
+            Play.play_for_round(self.current, player, player._pick_card())
 
+        self.assertEqual(self.current.status, RoundStatus.VOTING)
+
+    def test_round_is_voting_until_all_players_have_voted(self):
+        story_card = self.current.turn._pick_card()
+        Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
+        players = self.game.players.all().exclude(id=self.game.storyteller.id)
+        for player in players:
+            Play.play_for_round(self.current, player, player._pick_card())
+
+        plays = self.current.plays.all().exclude(player=self.game.storyteller)
+        for play in plays[1:]:
+            play.choose_card(story_card)
+
+        self.assertEqual(self.current.status, RoundStatus.VOTING)
+
+    def test_round_is_complete_when_all_players_have_voted(self):
+        story_card = self.current.turn._pick_card()
+        Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
+        players = self.game.players.all().exclude(id=self.game.storyteller.id)
         for player in players:
             Play.play_for_round(self.current, player, player._pick_card())
 
@@ -155,14 +188,44 @@ class RoundTest(TestCase):
         with self.assertRaises(GameDeckExhausted):
             new_round.deal()
 
-    def test_incomplete_round_can_not_be_closed(self):
+    def test_new_round_can_not_be_closed(self):
         self.assertEqual(self.current.status, RoundStatus.NEW)
         self.assertRaises(GameRoundIncomplete, self.current.close)
 
+    def test_providing_round_can_not_be_closed(self):
         story_card = self.current.turn._pick_card()
         story_play = Play.play_for_round(self.current, self.current.turn, story_card, 'test')
-        self.assertEqual(self.current.status, RoundStatus.PENDING)
+        Play.play_for_round(self.current, self.player2, self.player2._pick_card())
+        self.assertEqual(self.current.status, RoundStatus.PROVIDING)
         self.assertRaises(GameRoundIncomplete, self.current.close)
+
+    def test_voting_round_can_not_be_closed(self):
+        story_card = self.current.turn._pick_card()
+        Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
+        players = self.game.players.all().exclude(id=self.game.storyteller.id)
+        for player in players:
+            Play.play_for_round(self.current, player, player._pick_card())
+
+        plays = self.current.plays.all().exclude(player=self.game.storyteller)
+        for play in plays[1:]:
+            play.choose_card(story_card)
+
+        self.assertEqual(self.current.status, RoundStatus.VOTING)
+        self.assertRaises(GameRoundIncomplete, self.current.close)
+
+    def test_complete_round_can_be_closed(self):
+        story_card = self.current.turn._pick_card()
+        Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
+        players = self.game.players.all().exclude(id=self.game.storyteller.id)
+        for player in players:
+            Play.play_for_round(self.current, player, player._pick_card())
+
+        plays = self.current.plays.all().exclude(player=self.game.storyteller)
+        for play in plays:
+            play.choose_card(story_card)
+
+        self.assertEqual(self.current.status, RoundStatus.COMPLETE)
+        self.current.close()
 
     def test_storyteller_scores_when_player_guessed(self):
         story_card = self.current.turn._pick_card()

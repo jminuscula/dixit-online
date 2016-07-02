@@ -16,6 +16,7 @@ class GameTest(TestCase):
         self.game = Game.objects.create(name='test')
         self.user = User.objects.create(username='test', email='test@localhost', password='test')
         self.user2 = User.objects.create(username='test2', email='test2@localhost', password='test')
+        self.user3 = User.objects.create(username='test3', email='test3@localhost', password='test')
 
     def test_game_can_add_player(self):
         self.assertEqual(self.game.players.count(), 0)
@@ -68,13 +69,38 @@ class GameTest(TestCase):
         player2 = self.game.add_player(self.user2, 'player2')
         self.assertEqual(player2.cards.count(), settings.GAME_HAND_SIZE)
 
-    def test_game_doesnt_deal_new_player_when_round_is_not_new(self):
+    def test_game_deals_new_player_when_round_is_providing(self):
         storyteller = self.game.add_player(self.user, 'storyteller')
-        game_round = self.game.add_round()
-        Play.play_for_round(game_round, storyteller, storyteller._pick_card(), 'test')
+        self.game.add_round()
+        Play.play_for_round(self.game.current_round, storyteller, storyteller._pick_card(), 'story')
 
         player2 = self.game.add_player(self.user2, 'player2')
-        self.assertEqual(player2.cards.count(), 0)
+        self.assertEqual(player2.cards.count(), settings.GAME_HAND_SIZE)
+
+    def test_game_does_not_deal_new_player_when_round_is_voting(self):
+        storyteller = self.game.add_player(self.user, 'storyteller')
+        game_round = self.game.add_round()
+        Play.play_for_round(self.game.current_round, storyteller, storyteller._pick_card(), 'story')
+
+        player2 = self.game.add_player(self.user2, 'player2')
+        Play.play_for_round(self.game.current_round, player2, player2._pick_card())
+
+        player3 = self.game.add_player(self.user3, 'player3')
+        self.assertEqual(player3.cards.count(), 0)
+
+    def test_game_deals_new_player_when_round_is_complete(self):
+        storyteller = self.game.add_player(self.user, 'storyteller')
+        self.game.add_round()
+
+        story_card = storyteller._pick_card()
+        Play.play_for_round(self.game.current_round, storyteller, story_card, 'story')
+
+        player2 = self.game.add_player(self.user2, 'player2')
+        player2_play = Play.play_for_round(self.game.current_round, player2, player2._pick_card())
+        player2_play.choose_card(story_card)
+
+        player3 = self.game.add_player(self.user3, 'player3')
+        self.assertEqual(player3.cards.count(), 0)
 
     def test_game_can_not_advance_round_when_previous_is_not_complete(self):
         storyteller = self.game.add_player(self.user, 'storyteller')
@@ -106,11 +132,32 @@ class GameTest(TestCase):
 
         self.assertEqual(self.game.status, GameStatus.NEW)
 
-    def test_game_with_pending_round_is_ongoing(self):
+    def test_game_with_storyteller_play_is_new(self):
         storyteller = self.game.add_player(self.user, 'storyteller')
         game_round = self.game.add_round()
         Play.play_for_round(game_round, storyteller, storyteller._pick_card(), 'test')
 
+        self.assertEqual(self.game.status, GameStatus.NEW)
+
+    def test_game_with_providing_round_is_ongoing(self):
+        storyteller = self.game.add_player(self.user, 'storyteller')
+        game_round = self.game.add_round()
+
+        player2 = self.game.add_player(self.user2, 'player2')
+        player3 = self.game.add_player(self.user3, 'player3')
+
+        Play.play_for_round(game_round, storyteller, storyteller._pick_card(), 'test')
+        Play.play_for_round(game_round, player2, player2._pick_card())
+
+        self.assertEqual(self.game.status, GameStatus.ONGOING)
+
+    def test_game_with_voting_round_is_ongoing(self):
+        storyteller = self.game.add_player(self.user, 'storyteller')
+        game_round = self.game.add_round()
+        Play.play_for_round(game_round, storyteller, storyteller._pick_card(), 'test')
+
+        player2 = self.game.add_player(self.user2, 'player2')
+        Play.play_for_round(self.game.current_round, player2, player2._pick_card())
         self.assertEqual(self.game.status, GameStatus.ONGOING)
 
     def test_game_with_complete_round_is_finished(self):
@@ -133,6 +180,12 @@ class GameTest(TestCase):
 
     def test_started_game_without_players_is_abandoned(self):
         g = Game.new_game(name='test', user=self.user, player_name='storyteller')
+        storyteller = g.current_round.turn
+        Play.play_for_round(g.current_round, storyteller, storyteller._pick_card(), 'story')
+
+        player2 = g.add_player(self.user2, 'player2')
+        Play.play_for_round(g.current_round, player2, player2._pick_card())
+
         g.players.all().delete()
         self.assertEqual(g.status, GameStatus.ABANDONED)
 

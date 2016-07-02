@@ -4,7 +4,8 @@
 
 _design
 .tags*
-
+.coverage
+htmlcov
 
 #
 # Data

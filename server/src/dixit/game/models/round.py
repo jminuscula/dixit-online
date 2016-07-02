@@ -6,7 +6,7 @@ from collections import defaultdict
 from django.db import models
 from django.core.exceptions import ObjectDoesNotExist
 from django.dispatch import receiver
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.utils.translation import ugettext as _
 
 from dixit import settings
@@ -17,7 +17,8 @@ from dixit.game.exceptions import GameDeckExhausted, GameInvalidPlay, GameRoundI
 
 class RoundStatus(ChoicesEnum):
     NEW = 'new'
-    PENDING = 'pending'
+    PROVIDING = 'providing'
+    VOTING = 'voting'
     COMPLETE = 'complete'
 
 
@@ -38,7 +39,7 @@ class Round(models.Model):
     game = models.ForeignKey(Game, related_name='rounds')
     number = models.IntegerField(default=0)  # (game, number form pk together)
     status = models.CharField(max_length=16, default='new', choices=RoundStatus.choices())
-    turn = models.ForeignKey(Player)
+    turn = models.ForeignKey(Player, null=True, on_delete=models.SET_NULL)
     n_players = models.IntegerField(default=1)
     card = models.ForeignKey(Card, null=True, related_name='system_round_play')
 
@@ -54,8 +55,9 @@ class Round(models.Model):
         return "{} of <Game {}: '{}'>".format(self.number, self.game.id, self.game.name)
 
     def update_status(self):
+        players = self.game.players.exclude(id=self.turn.id)
         plays = self.plays.all()
-        play_status = {p.player: p.complete for p in plays}
+        play_status = {p.player: p.status for p in plays}
         status = RoundStatus.COMPLETE
 
         # if storyteller is the only one who has played, the round is still new
@@ -63,9 +65,12 @@ class Round(models.Model):
         if not plays or play_status.keys() == {self.turn, }:
             status = RoundStatus.NEW
 
-        elif not all(play_status.values()):
-            # if any other player has started, round is locked on ongoing
-            status = RoundStatus.PENDING
+        elif len(plays) - 1 < len(players):
+            # if any player has started, round is locked on ongoing
+            status = RoundStatus.PROVIDING
+
+        elif any(s == RoundStatus.VOTING for s in play_status.values()):
+            status = RoundStatus.VOTING
 
         if self.status != status:
             self.status = status
@@ -169,6 +174,11 @@ class Round(models.Model):
         return self
 
 
+class PlayStatus(ChoicesEnum):
+    PROVIDING = 'providing'
+    VOTING = 'voting'
+    COMPLETE = 'complete'
+
 
 class Play(models.Model):
     """
@@ -182,7 +192,8 @@ class Play(models.Model):
     """
 
     game_round = models.ForeignKey(Round, related_name='plays')
-    player = models.ForeignKey(Player, related_name='plays')
+    player = models.ForeignKey(Player, related_name='plays',
+                               null=True, on_delete=models.SET_NULL)
 
     # card being played in phase 1
     card_provided = models.ForeignKey(Card, related_name='plays')
@@ -199,10 +210,16 @@ class Play(models.Model):
         unique_together = (('game_round', 'player'), )
 
     @property
-    def complete(self):
+    def status(self):
         if self.player == self.game_round.turn:
-            return self.card_provided is not None
-        return self.card_chosen is not None
+            if self.card_provided:
+                return PlayStatus.COMPLETE
+            return PlayStatus.PROVIDING
+        if not self.card_provided:
+            return PlayStatus.PROVIDING
+        elif not self.card_chosen:
+            return PlayStatus.VOTING
+        return PlayStatus.COMPLETE
 
     @classmethod
     def play_for_round(cls, game_round, player, card, story=None):
@@ -245,14 +262,13 @@ class Play(models.Model):
         if self.player == self.game_round.turn:
             raise GameInvalidPlay('storytellers can not choose any cards')
 
-        if card == self.card_provided:
+        elif self.game_round.status != RoundStatus.VOTING:
+            raise GameInvalidPlay('not all players have provided a card yet')
+
+        elif card == self.card_provided:
             raise GameInvalidPlay('player can not choose their own card')
 
         round_cards = set(Card.objects.played_for_round(self.game_round))
-        # account for the system card
-        if len(round_cards) - 1 != self.game_round.game.players.count():
-            raise GameInvalidPlay('not all players have provided a card yet')
-
         if card not in round_cards:
             raise GameInvalidPlay('the chosen card is not being played in this round')
 
@@ -265,3 +281,7 @@ class Play(models.Model):
 @receiver(post_save, sender='game.Play')
 def update_status(sender, instance, *args, **kwargs):
     return instance.game_round.update_status()
+
+@receiver(post_delete, sender='game.Player')
+def update_turn(sender, instance, *args, **kwargs):
+    return instance.game.update_turn(instance)
