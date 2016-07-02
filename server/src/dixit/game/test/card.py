@@ -36,7 +36,7 @@ class CardManagerTest(TestCase):
         card2 = self.player2._pick_card()
         play2 = Play.play_for_round(self.game.current_round, self.player2, card2)
         # import ipdb; ipdb.set_trace()
-        play2.choose_card(story_card)
+        play2.vote_card(story_card)
 
         self.assertEqual(set(Card.objects.chosen_for_round(self.game.current_round)), {story_card, })
 

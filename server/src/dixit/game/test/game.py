@@ -97,7 +97,7 @@ class GameTest(TestCase):
 
         player2 = self.game.add_player(self.user2, 'player2')
         player2_play = Play.play_for_round(self.game.current_round, player2, player2._pick_card())
-        player2_play.choose_card(story_card)
+        player2_play.vote_card(story_card)
 
         player3 = self.game.add_player(self.user3, 'player3')
         self.assertEqual(player3.cards.count(), 0)
@@ -120,7 +120,7 @@ class GameTest(TestCase):
         Play.play_for_round(game_round, storyteller, story_card, 'test')
 
         play2 = Play.play_for_round(game_round, player2, player2._pick_card())
-        play2.choose_card(story_card)
+        play2.vote_card(story_card)
 
         next_round = self.game.next_round()
         self.assertTrue(next_round is not None)
@@ -170,7 +170,7 @@ class GameTest(TestCase):
 
         card2 = player2._pick_card()
         play2 = Play.play_for_round(game_round, player2, card2)
-        play2.choose_card(story_card)
+        play2.vote_card(story_card)
 
         self.assertEqual(self.game.status, GameStatus.FINISHED)
 

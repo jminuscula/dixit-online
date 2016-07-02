@@ -25,6 +25,10 @@ urlpatterns = [
         round_views.RoundRetrieve.as_view(), name='round-detail'),
     url(r'^game/(?P<game_pk>[0-9]+)/round/(?P<round_number>[0-9]+)/play$',
         round_views.PlayList.as_view(), name='play-list'),
+    url(r'^game/(?P<game_pk>[0-9]+)/round/(?P<round_number>[0-9]+)/provide$',
+        round_views.PlayProvideCreate.as_view(), name='play-provide'),
+    url(r'^game/(?P<game_pk>[0-9]+)/round/(?P<round_number>[0-9]+)/vote$',
+        round_views.PlayVoteCreate.as_view(), name='play-vote'),
 
 ]
 

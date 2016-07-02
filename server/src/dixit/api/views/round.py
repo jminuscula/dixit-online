@@ -9,6 +9,7 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 
 from dixit.game.models import Game, Round, Play, Player, Card
+from dixit.game.models.round import RoundStatus
 from dixit.game.exceptions import GameInvalidPlay
 from dixit.api.views.mixins import GameObjectMixin, RoundObjectMixin
 from dixit.api.serializers.round import RoundListSerializer, RoundRetrieveSerializer
@@ -41,8 +42,7 @@ class RoundRetrieve(generics.RetrieveAPIView):
 
 class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
     model = Play
-
-    permission_classes = (IsAuthenticated, GamePlayer, PlayerOwned)
+    permission_classes = (IsAuthenticated, GamePlayer)
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -52,10 +52,29 @@ class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
     def get_queryset(self):
         return Play.objects.filter(game_round=self.get_round())
 
+
+class PlayRetrieve(generics.RetrieveAPIView):
+    model = Play
+    serializer_class = PlaySerializer
+    lookup_url_kwarg = 'play_pk'
+
+    permission_classes = (IsAuthenticated, GamePlayer, PlayerOwned)
+
+    def get_object(self):
+        game_pk = self.kwargs['game_pk']
+        round_number = self.kwargs['round_number']
+        return get_object_or_404(Play, game=game_pk, round__number=round_number)
+
+
+class PlayProvideCreate(RoundObjectMixin, generics.CreateAPIView):
+    model = Play
+    serializer_class = PlayCreateSerializer
+    permission_classes = (IsAuthenticated, GamePlayer)
+
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(seializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         game_round = self.get_round()
         player = Player.objects.get(game=game_round.game, user=request.user)
@@ -70,15 +89,30 @@ class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
         play_data = PlaySerializer(play).data
         return Response(play_data, status=status.HTTP_201_CREATED)
 
-
-class PlayRetrieve(generics.RetrieveAPIView):
+class PlayVoteCreate(RoundObjectMixin, generics.CreateAPIView):
     model = Play
-    serializer_class = PlaySerializer
-    lookup_url_kwarg = 'play_pk'
+    serializer_class = PlayCreateSerializer
+    permission_classes = (IsAuthenticated, GamePlayer)
 
-    permission_classes = (IsAuthenticated, GamePlayer, PlayerOwned)
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        if not serializer.is_valid():
+            return Response(seializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get_object(self):
-        game_pk = self.kwargs['game_pk']
-        round_number = self.kwargs['round_number']
-        return get_object_or_404(Play, game=game_pk, round__number=round_number)
+        game_round = self.get_round()
+        player = Player.objects.get(game=game_round.game, user=request.user)
+        card = serializer.validated_data.get('card')
+        play = Play.objects.get(game_round=game_round, player=player)
+
+        try:
+            play.vote_card(card)
+        except GameInvalidPlay as exc:
+            return Response({'detail': exc.msg}, status=status.HTTP_403_FORBIDDEN)
+
+        game_round.refresh_from_db()
+        if game_round.status == RoundStatus.COMPLETE:
+            game = self.get_game()
+            game.next_round()
+
+        play_data = PlaySerializer(play).data
+        return Response(play_data, status=status.HTTP_201_CREATED)

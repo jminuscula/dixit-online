@@ -54,7 +54,7 @@ class PlayTest(TestCase):
         play3 = Play.play_for_round(self.current, self.player3, self.player3._pick_card())
 
         self.assertEqual(self.current.status, RoundStatus.VOTING)
-        play2.choose_card(story_card)
+        play2.vote_card(story_card)
 
     def test_players_can_not_choose_unplayed_card(self):
         story_card = self.game.storyteller._pick_card()
@@ -65,7 +65,7 @@ class PlayTest(TestCase):
 
         with self.assertRaises(GameInvalidPlay):
             other_card = Card.objects.available_for_game(self.game)[0]
-            play2.choose_card(other_card)
+            play2.vote_card(other_card)
 
     def test_players_can_not_choose_own_card(self):
         story_card = self.game.storyteller._pick_card()
@@ -74,9 +74,9 @@ class PlayTest(TestCase):
         card2 = self.player2._pick_card()
         play2 = Play.play_for_round(self.current, self.player2, card2)
         with self.assertRaises(GameInvalidPlay):
-            play2.choose_card(card2)
+            play2.vote_card(card2)
 
-    def test_storytellers_cant_choose_card(self):
+    def test_storytellers_cant_vote_card(self):
         story_card = self.game.storyteller._pick_card()
         story_play = Play.play_for_round(self.current, self.game.storyteller, story_card, 'story')
 
@@ -84,7 +84,7 @@ class PlayTest(TestCase):
         play2 = Play.play_for_round(self.current, self.player2, card2)
 
         with self.assertRaises(GameInvalidPlay):
-            story_play.choose_card(card2)
+            story_play.vote_card(card2)
 
 
 class RoundTest(TestCase):
@@ -136,7 +136,7 @@ class RoundTest(TestCase):
 
         plays = self.current.plays.all().exclude(player=self.game.storyteller)
         for play in plays[1:]:
-            play.choose_card(story_card)
+            play.vote_card(story_card)
 
         self.assertEqual(self.current.status, RoundStatus.VOTING)
 
@@ -149,7 +149,7 @@ class RoundTest(TestCase):
 
         plays = self.current.plays.all().exclude(player=self.game.storyteller)
         for play in plays:
-            play.choose_card(story_card)
+            play.vote_card(story_card)
 
         self.assertEqual(self.current.status, RoundStatus.COMPLETE)
 
@@ -208,7 +208,7 @@ class RoundTest(TestCase):
 
         plays = self.current.plays.all().exclude(player=self.game.storyteller)
         for play in plays[1:]:
-            play.choose_card(story_card)
+            play.vote_card(story_card)
 
         self.assertEqual(self.current.status, RoundStatus.VOTING)
         self.assertRaises(GameRoundIncomplete, self.current.close)
@@ -222,7 +222,7 @@ class RoundTest(TestCase):
 
         plays = self.current.plays.all().exclude(player=self.game.storyteller)
         for play in plays:
-            play.choose_card(story_card)
+            play.vote_card(story_card)
 
         self.assertEqual(self.current.status, RoundStatus.COMPLETE)
         self.current.close()
@@ -237,8 +237,8 @@ class RoundTest(TestCase):
         card3 = self.player3._pick_card()
         play3 = Play.play_for_round(self.current, self.player3, card3)
 
-        play2.choose_card(story_card)
-        play3.choose_card(card2)
+        play2.vote_card(story_card)
+        play3.vote_card(card2)
 
         self.current.close()
 
@@ -255,8 +255,8 @@ class RoundTest(TestCase):
         card3 = self.player3._pick_card()
         play3 = Play.play_for_round(self.current, self.player3, card3)
 
-        play2.choose_card(story_card)
-        play3.choose_card(story_card)
+        play2.vote_card(story_card)
+        play3.vote_card(story_card)
 
         self.current.close()
 
@@ -273,8 +273,8 @@ class RoundTest(TestCase):
         card3 = self.player3._pick_card()
         play3 = Play.play_for_round(self.current, self.player3, card3)
 
-        play2.choose_card(card3)
-        play3.choose_card(card2)
+        play2.vote_card(card3)
+        play3.vote_card(card2)
 
         self.current.close()
 
@@ -296,9 +296,9 @@ class RoundTest(TestCase):
         card4 = player4._pick_card()
         play4 = Play.play_for_round(self.current, player4, card4)
 
-        play2.choose_card(story_card)
-        play3.choose_card(card2)
-        play4.choose_card(card2)
+        play2.vote_card(story_card)
+        play3.vote_card(card2)
+        play4.vote_card(card2)
 
         self.current.close()
 

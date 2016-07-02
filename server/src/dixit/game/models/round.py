@@ -66,10 +66,12 @@ class Round(models.Model):
             status = RoundStatus.NEW
 
         elif len(plays) - 1 < len(players):
-            # if any player has started, round is locked on ongoing
+            # if any player other than storyteller has started, round is ongoing
             status = RoundStatus.PROVIDING
 
         elif any(s == RoundStatus.VOTING for s in play_status.values()):
+            # round is voting until all players other than the storyteller have voted.
+            # Note that there can't be a providing and voting plays at the same time.
             status = RoundStatus.VOTING
 
         if self.status != status:
@@ -146,12 +148,13 @@ class Round(models.Model):
         guesses = {p.player: 0 for p in players_plays}
 
         for play in players_plays:
-            if play.card_chosen == story_card:
+            if play.card_voted == story_card:
                 scores[play.player] += settings.GAME_GUESS_SCORE
                 guesses[play.player] = True
             else:
-                chosen_play = plays.get(card_provided=play.card_chosen, game_round=self)
-                scores[chosen_play.player] += settings.GAME_CONFUSED_GUESS_SCORE
+                if play.card_voted != self.card:
+                    chosen_play = plays.get(card_provided=play.card_voted, game_round=self)
+                    scores[chosen_play.player] += settings.GAME_CONFUSED_GUESS_SCORE
 
             play.player.cards.remove(play.card_provided)
         self.turn.cards.remove(story_card)
@@ -184,7 +187,7 @@ class Play(models.Model):
     """
     Describes a playing move for a player in a round.
 
-    If the player is the storyteller a story must be provided and card_chosen won't
+    If the player is the storyteller a story must be provided and card_voted won't
     be set. Otherwise, a story can't be provided.
 
     Note that a play covers both phases of each round -eg: providing a card and
@@ -200,7 +203,7 @@ class Play(models.Model):
     story = models.CharField(max_length=256, null=True)
 
     # card voted in phase 2 (storyteller can't vote)
-    card_chosen = models.ForeignKey(Card, null=True, related_name='chosen')
+    card_voted = models.ForeignKey(Card, null=True, related_name='chosen')
 
     class Meta:
         verbose_name = _('play')
@@ -217,7 +220,7 @@ class Play(models.Model):
             return PlayStatus.PROVIDING
         if not self.card_provided:
             return PlayStatus.PROVIDING
-        elif not self.card_chosen:
+        elif not self.card_voted:
             return PlayStatus.VOTING
         return PlayStatus.COMPLETE
 
@@ -234,7 +237,10 @@ class Play(models.Model):
         Play a card for the current round.
         Storytellers must provide a story when providing a card.
         """
-        if story is None and self.player == self.game_round.turn:
+        if self.game_round.status == RoundStatus.COMPLETE:
+            raise GameInvalidPlay('the round is complete')
+
+        elif story is None and self.player == self.game_round.turn:
             raise GameInvalidPlay('the storyteller needs to provide a story')
 
         elif card not in self.player.cards.all():
@@ -254,12 +260,15 @@ class Play(models.Model):
 
         return self
 
-    def choose_card(self, card):
+    def vote_card(self, card):
         """
         Choose a card among all provided in the round. The round must be complete.
         Players can't choose their own cards.
         """
-        if self.player == self.game_round.turn:
+        if self.game_round.status == RoundStatus.COMPLETE:
+            raise GameInvalidPlay('the round is complete')
+
+        elif self.player == self.game_round.turn:
             raise GameInvalidPlay('storytellers can not choose any cards')
 
         elif self.game_round.status != RoundStatus.VOTING:
@@ -272,7 +281,7 @@ class Play(models.Model):
         if card not in round_cards:
             raise GameInvalidPlay('the chosen card is not being played in this round')
 
-        self.card_chosen = card
+        self.card_voted = card
         self.save()
 
         return self
