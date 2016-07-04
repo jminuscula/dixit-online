@@ -174,7 +174,7 @@ class Round(models.Model):
         # Player card gets story added with confidence based directly on the
         # ratio of guesses (eg: (100 / players) * votes)
 
-        return self
+        return True
 
 
 class PlayStatus(ChoicesEnum):
@@ -238,7 +238,10 @@ class Play(models.Model):
         Storytellers must provide a story when providing a card.
         """
         if self.game_round.status == RoundStatus.COMPLETE:
-            raise GameInvalidPlay('the round is complete')
+            raise GameInvalidPlay('the round is closed')
+
+        elif self.game_round.status == RoundStatus.VOTING:
+            raise GameInvalidPlay('can not change the card, voting has started')
 
         elif story is None and self.player == self.game_round.turn:
             raise GameInvalidPlay('the storyteller needs to provide a story')
@@ -246,14 +249,11 @@ class Play(models.Model):
         elif card not in self.player.cards.all():
             raise GameInvalidPlay('the card is not available to player')
 
-        if self.player != self.game_round.turn:
+        elif self.player != self.game_round.turn:
             try:
                 self.game_round.plays.get(player=self.game_round.turn)
             except ObjectDoesNotExist:
                 raise GameInvalidPlay('can not provide a card without a story first')
-
-        if Card.objects.chosen_for_round(self.game_round).count() >= 1:
-            raise GameInvalidPlay('can not change the card, voting has started')
 
         self.card_provided = card
         self.save()
@@ -266,7 +266,7 @@ class Play(models.Model):
         Players can't choose their own cards.
         """
         if self.game_round.status == RoundStatus.COMPLETE:
-            raise GameInvalidPlay('the round is complete')
+            raise GameInvalidPlay('the round is closed')
 
         elif self.player == self.game_round.turn:
             raise GameInvalidPlay('storytellers can not choose any cards')

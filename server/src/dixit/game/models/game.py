@@ -7,7 +7,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from dixit import settings
 from dixit.utils import ChoicesEnum
-from dixit.game.exceptions import GameDeckExhausted, GameRoundIncomplete
+from dixit.game.exceptions import GameDeckExhausted, GameRoundIncomplete, GameFinished
 
 
 class GameStatus(ChoicesEnum):
@@ -97,6 +97,21 @@ class Game(models.Model):
         game.add_round()
         return game
 
+    def is_complete(self):
+        """
+        Checks if after the completion of the current round any player has achieved
+        the goal score.
+        """
+        if (not self.current_round or
+            self.current_round.status != RoundStatus.COMPLETE):
+            return False
+
+        for player in self.game.players():
+            if player.score >= settings.GAME_GOAL_SCORE:
+                return True
+
+        return False
+
     def add_player(self, user, player_name):
         """
         Adds a new player to the game and deals cards if a round is available
@@ -163,10 +178,9 @@ class Game(models.Model):
         """
         Closes the current round, which updates the scoring, and adds a new round.
         """
-        try:
-            self.current_round.close()
-        except GameRoundIncomplete:
-            return None
+        self.current_round.close()
+        if self.is_complete():
+            raise GameFinished
         return self.add_round()
 
 

@@ -10,6 +10,7 @@ GAME_GUESS_SCORE = 3
 GAME_STORY_SCORE = 3
 GAME_CONFUSED_GUESS_SCORE = 1
 GAME_MAX_ROUND_SCORE = 4
+GAME_GOAL_SCORE = 21
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -119,5 +120,5 @@ USE_TZ = True
 
 
 FIXTURE_DIRS = (
-   os.path.join(BASE_DIR, 'dixit/fixtures'), 
+   os.path.join(BASE_DIR, 'dixit/fixtures'),
 )

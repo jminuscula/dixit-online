@@ -112,7 +112,10 @@ class PlayVoteCreate(RoundObjectMixin, generics.CreateAPIView):
         game_round.refresh_from_db()
         if game_round.status == RoundStatus.COMPLETE:
             game = self.get_game()
-            game.next_round()
+            try:
+                game.next_round()
+            except (GameDeckExhausted, GameFinished):  # treat deck exhaust as a fair finish
+                pass
 
         play_data = PlaySerializer(play).data
         return Response(play_data, status=status.HTTP_201_CREATED)

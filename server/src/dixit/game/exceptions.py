@@ -23,3 +23,9 @@ class GameInvalidPlay(GameException):
     """
     The play can't be performed
     """
+
+
+class GameFinished(GameException):
+    """
+    The game has finished and can't be played any longer
+    """
