@@ -3,6 +3,7 @@
 #
 
 _design
+server/static
 .tags*
 .coverage
 htmlcov

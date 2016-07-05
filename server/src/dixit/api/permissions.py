@@ -21,7 +21,7 @@ class GamePlayer(permissions.BasePermission):
 
 
 
-    class PlayerOwned(permissions.BasePermission):
+class PlayerOwned(permissions.BasePermission):
     """
     Checks current user is the player directly related to the request object
     """

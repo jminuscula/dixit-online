@@ -15,6 +15,7 @@ GAME_GOAL_SCORE = 21
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, '../static')
 
 
 # Folder with game card images
@@ -28,7 +29,9 @@ TOKEN_LENGTH = 16
 
 
 DEBUG = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+]
 
 
 INSTALLED_APPS = [
@@ -90,27 +93,28 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.BasicAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    )
+    ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+    ),
 }
 
+AUTH_PASSWORD_VALIDATORS = [
+    {
+        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+    },
+    {
+        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+    },
+]
+
 LOGIN_REDIRECT_URL = r'/'
-
-if not DEBUG:
-    AUTH_PASSWORD_VALIDATORS = [
-        {
-            'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-        },
-        {
-            'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        },
-        {
-            'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-        },
-        {
-            'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-        },
-    ]
-
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -122,3 +126,7 @@ USE_TZ = True
 FIXTURE_DIRS = (
    os.path.join(BASE_DIR, 'dixit/fixtures'),
 )
+
+if DEBUG:
+    del REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES']
+    AUTH_PASSWORD_VALIDATORS = []
