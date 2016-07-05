@@ -1,6 +1,4 @@
 
-from django.http import Http404
-
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
@@ -13,6 +11,11 @@ from dixit.api.serializers.round import RoundListSerializer
 
 
 class GameList(generics.ListCreateAPIView):
+    """
+    Implements Game list actions
+        - GET list of games
+        - POST a new game from game and player names
+    """
     model = Game
     lookup_url_kwarg = 'game_pk'
 
@@ -46,6 +49,11 @@ class GameList(generics.ListCreateAPIView):
 
 
 class GameRetrieve(generics.RetrieveAPIView):
+    """
+    Implements Game retrieve actions
+        - GET game details
+    """
+
     serializer_class = GameRetrieveSerializer
     queryset = Game.objects.all()
     lookup_url_kwarg = 'game_pk'

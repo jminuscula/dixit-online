@@ -1,10 +1,10 @@
 
 from django.http import Http404
 from django.db import IntegrityError
-from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework import generics, status
 
@@ -18,6 +18,12 @@ from dixit.api.permissions import GamePlayer, PlayerOwned
 
 
 class RoundList(GameObjectMixin, generics.ListAPIView):
+    """
+    Implements Round list actions
+        - GET list of game rounds
+
+    Rounds are managed by the game itself and can't be added from the API
+    """
     model = Round
     serializer_class = RoundListSerializer
 
@@ -27,7 +33,11 @@ class RoundList(GameObjectMixin, generics.ListAPIView):
         return Round.objects.filter(game=self.get_game())
 
 
-class RoundRetrieve(generics.RetrieveAPIView):
+class RoundRetrieve(RoundObjectMixin, generics.RetrieveAPIView):
+    """
+    Implements Round retrieve actions
+        - GET round details
+    """
     model = Round
     serializer_class = RoundRetrieveSerializer
     lookup_url_kwarg = 'round_pk'
@@ -35,12 +45,16 @@ class RoundRetrieve(generics.RetrieveAPIView):
     permission_classes = (IsAuthenticated, GamePlayer)
 
     def get_object(self):
-        game_pk = self.kwargs['game_pk']
-        number = self.kwargs['round_number']
-        return get_object_or_404(Round, game=game_pk, number=number)
+        return self.get_round()
 
 
 class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
+    """
+    Implements Play list actions
+        - GET list of round plays
+
+    Plays are created using two specific endpoints: Provide and Vote
+    """
     model = Play
     permission_classes = (IsAuthenticated, GamePlayer)
 
@@ -54,6 +68,10 @@ class PlayList(RoundObjectMixin, generics.ListCreateAPIView):
 
 
 class PlayRetrieve(generics.RetrieveAPIView):
+    """
+    Implements Play retrieve actions
+        - GET play details
+    """
     model = Play
     serializer_class = PlaySerializer
     lookup_url_kwarg = 'play_pk'
@@ -63,10 +81,19 @@ class PlayRetrieve(generics.RetrieveAPIView):
     def get_object(self):
         game_pk = self.kwargs['game_pk']
         round_number = self.kwargs['round_number']
-        return get_object_or_404(Play, game=game_pk, round__number=round_number)
+        try:
+            return Play.objects.get(game=game_pk, round__number=round_number)
+        except Play.DoesNotExist:
+            raise NotFound('play not found')
 
 
 class PlayProvideCreate(RoundObjectMixin, generics.CreateAPIView):
+    """
+    Implements Play provide action
+        - POST a new play providing a card
+
+    POST may be called any number of times as long as the round is in PROVIDING state
+    """
     model = Play
     serializer_class = PlayCreateSerializer
     permission_classes = (IsAuthenticated, GamePlayer)
@@ -90,6 +117,12 @@ class PlayProvideCreate(RoundObjectMixin, generics.CreateAPIView):
         return Response(play_data, status=status.HTTP_201_CREATED)
 
 class PlayVoteCreate(RoundObjectMixin, generics.CreateAPIView):
+    """
+    Implements Play vote action
+        - POST a new vote
+
+    POST may be called any number of times as long as the round is in VOTING state
+    """
     model = Play
     serializer_class = PlayCreateSerializer
     permission_classes = (IsAuthenticated, GamePlayer)

@@ -1,28 +1,30 @@
 
-from django.http import Http404
 from django.db import IntegrityError
-from django.shortcuts import get_object_or_404
 
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework import generics, status
 
 from dixit.game.models import Player, Game
 from dixit.api.serializers.player import PlayerSerializer, PlayerCreateSerializer, PlayerScoreSerializer
+from dixit.api.views.mixins import GameObjectMixin
 
 
-class PlayerList(generics.ListCreateAPIView):
+class PlayerList(GameObjectMixin, generics.ListCreateAPIView):
+    """
+    Implements Player list actions
+        - GET list of players for a game
+        - POST a new player t oa game from a player name
+    """
     model = Player
     serializer_class = PlayerSerializer
 
     permission_classes = (IsAuthenticated, )
 
-    def _get_game(self):
-        return get_object_or_404(Game, pk=self.kwargs['game_pk'])
-
     def get_queryset(self):
-        return Player.objects.filter(game=self._get_game())
+        return Player.objects.filter(game=self.get_game())
 
     def get_serializer_class(self):
         if self.request.method == 'POST':
@@ -34,8 +36,8 @@ class PlayerList(generics.ListCreateAPIView):
         if not serializer.is_valid():
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        game = self._get_game()
         try:
+            game = self.get_game()
             player = game.add_player(request.user, request.data['name'])
         except IntegrityError as exc:
             if 'user_id' in str(exc):
@@ -47,6 +49,11 @@ class PlayerList(generics.ListCreateAPIView):
 
 
 class PlayerRetrieve(generics.RetrieveDestroyAPIView):
+    """
+    Implements Player retrieve action
+        - GET player for game
+    """
+
     model = Player
     serializer_class = PlayerSerializer
 
@@ -55,4 +62,7 @@ class PlayerRetrieve(generics.RetrieveDestroyAPIView):
     def get_object(self):
         game_pk = self.kwargs['game_pk']
         number = self.kwargs['player_number']
-        return get_object_or_404(Player, game=game_pk, number=number)
+        try:
+            return get_object_or_404(Player, game=game_pk, number=number)
+        except Player.DoesNotExist:
+            raise NotFound('player not found')

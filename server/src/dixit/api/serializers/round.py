@@ -22,7 +22,8 @@ class RoundListSerializer(serializers.ModelSerializer):
 
 class RoundRetrieveSerializer(serializers.ModelSerializer):
     """
-    Serializes a Round object including play information
+    Serializes a Round object in detail
+      - Cards Provided won't be available until all round cards have been provided
     """
     turn = PlayerSerializer(read_only=True)
     story = serializers.SerializerMethodField()
@@ -64,6 +65,7 @@ class PlaySerializer(serializers.ModelSerializer):
 
 class PlayCreateSerializer(serializers.Serializer):
     """
+    Serializes input for a Play action, both provide/vote
     """
     story = serializers.CharField(max_length=256, required=False)
     card = serializers.PrimaryKeyRelatedField(queryset=Card.objects.all())
