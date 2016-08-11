@@ -7,13 +7,13 @@ This project is a proof of concept of an online version of [Dixit](http://en.lib
 
 Dixit provides a set of abstract illustrations that players need to describe. Each turn one player will be the _storyteller_, who secretly chooses one of their dealt cards and announces its description —this can be a word, a phrase, a related thought, etc. The rest of the players choose the card from their hand that best resembles the provided description, and all the cards are mixed before being revealed.
 
-Once the cards are displayed, each player except the storyteller vote on which one they think is the original card that matches the description. Players will be confused, since ideally everybody will have chosen an illustration that somehow resembles that thought. The storyteller must provide a description that is too obvious, since they won't get any points if all players guess their card. On the other hand, if they are succinct enough for someone to guess their illustration, they will be awarded *3 points*. Players who correctly guess are also awarded *3 points*, plus *1 additional point* if any player votes their card.
+Once the cards are displayed, each player except the storyteller vote on which one they think is the original card that matches the description. Players will be confused, since ideally everybody will have chosen an illustration that somehow resembles that thought. The storyteller must not provide a description that is too obvious, since they won't get any points if all players guess their card. On the other hand, if they are succinct enough for someone to guess their illustration, they will be awarded *3 points*. Players who correctly guess are also awarded *3 points*, plus *1 additional point* if any player votes their card.
 
 So the scoring is:
   * 0 points for the storyteller if everybody guesses their card
   * 3 points for the storyteller if someone, but not everybody, guesses their card
   * 3 points for players who correctly guess the storyteller's card
-  * 1 points for player who provided a card that is chosen by any other player.
+  * +1 points for player who provided a card that is chosen by any other player.
 
 The game ends when all cards have been dealt.
 
@@ -27,10 +27,10 @@ The API allows the games to be played asynchronously, so players may participate
 
 # Technology
 
-The API backend is based on [Django](https://djangoproject.org) and the client is an [Angular](https://angularjs.org) (1.5) application.
+The API backend is based on [Django](https://djangoproject.org) and the client is an [Angular 2](https://angularjs.org) application.
 
 
-# Install
+# Running the Server
 
 Requirements:
   * Python 3.5
