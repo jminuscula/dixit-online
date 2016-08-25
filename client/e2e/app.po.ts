@@ -1,4 +1,4 @@
-export class ClientPage {
+export class DixitOnlineClientPage {
   navigateTo() {
     return browser.get('/');
   }

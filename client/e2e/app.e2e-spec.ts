@@ -1,10 +1,10 @@
-import { ClientPage } from './app.po';
+import { DixitOnlineClientPage } from './app.po';
 
-describe('client App', function() {
-  let page: ClientPage;
+describe('dixit-online-client App', function() {
+  let page: DixitOnlineClientPage;
 
   beforeEach(() => {
-    page = new ClientPage();
+    page = new DixitOnlineClientPage();
   });
 
   it('should display message saying app works', () => {
