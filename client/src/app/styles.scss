@@ -1,0 +1,28 @@
+
+/*
+http://itcss.io
+*/
+
+// project level configuration, variables and settings
+@import "scss/a_settings/settings";
+
+// mixins, unit-conversions, media-queries
+@import "scss/b_tools/tools";
+
+// normalization, reset
+@import "scss/c_generic/generic";
+
+// page, layout, type, elements
+@import "scss/d_base/base";
+
+// building blocks, lists, headers, tables
+@import "scss/e_objects/objects";
+
+// UI components
+@import "scss/f_components/components";
+
+// theme specific overrides
+@import "scss/g_theme/theme";
+
+// hacks
+@import "scss/h_overrides/overrides";
