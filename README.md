@@ -18,11 +18,15 @@ So the scoring is:
 The game ends when all cards have been dealt.
 
 
-# Online version
+# About this project
 
-This project provides both a server implementing a *Game API* and a *Web Client* for players to join games and play.
+Dixit-Online provides both a server implementing a *Game API* and a *Web Client* for players to join games and play.
 
 The API allows the games to be played asynchronously, so players may participate in a game at different times. A user may be a player in more than one game simultaneously.
+
+The client is still being developed.
+
+![hd desktop mockup](screenshots/hd_play_card.png)
 
 
 # Technology
@@ -66,6 +70,11 @@ Requirements:
 8. Run application server
 
     `$ ./src/manage.py runserver`
+
+
+# Running the Client
+
+Coming soon!
 
 
 # Copyright
