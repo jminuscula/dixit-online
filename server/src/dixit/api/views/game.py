@@ -1,5 +1,4 @@
 
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import generics, status
@@ -7,7 +6,6 @@ from rest_framework import generics, status
 from dixit.game.models import Game
 from dixit.game.exceptions import GameDeckExhausted
 from dixit.api.serializers.game import GameListSerializer, GameCreateSerializer, GameRetrieveSerializer
-from dixit.api.serializers.round import RoundListSerializer
 
 
 class GameList(generics.ListCreateAPIView):

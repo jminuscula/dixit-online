@@ -2,7 +2,7 @@
 from rest_framework import permissions
 from rest_framework.exceptions import NotFound
 
-from dixit.game.models import Game, Player
+from dixit.game.models import Game
 
 
 class GamePlayer(permissions.BasePermission):

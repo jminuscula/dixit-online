@@ -9,7 +9,7 @@ from dixit.game.models import Card
 
 
 SUPPORTED_FORMATS = {
-'.jpg', '.jpeg', '.png', '.webp'
+    '.jpg', '.jpeg', '.png', '.webp'
 }
 
 

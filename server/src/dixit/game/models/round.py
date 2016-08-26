@@ -1,5 +1,4 @@
 
-import enum
 import random
 from collections import defaultdict
 
@@ -11,7 +10,7 @@ from django.utils.translation import ugettext as _
 
 from dixit import settings
 from dixit.utils import ChoicesEnum
-from dixit.game.models import Game, Card, CardDescription, Player
+from dixit.game.models import Game, Card, Player
 from dixit.game.exceptions import GameDeckExhausted, GameInvalidPlay, GameRoundIncomplete
 
 
@@ -134,7 +133,6 @@ class Round(models.Model):
               that chooses their card
             - The players get GAME_MAX_ROUND_SCORE maximum points
         """
-        from dixit.game.models import Play
         from dixit.game.models.round import RoundStatus
 
         if self.status != RoundStatus.COMPLETE:

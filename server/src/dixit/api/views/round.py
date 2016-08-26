@@ -1,16 +1,12 @@
 
-from django.http import Http404
-from django.db import IntegrityError
-
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework import generics, status
 
-from dixit.game.models import Game, Round, Play, Player, Card
+from dixit.game.models import Round, Play, Player
 from dixit.game.models.round import RoundStatus
-from dixit.game.exceptions import GameInvalidPlay
+from dixit.game.exceptions import GameInvalidPlay, GameDeckExhausted, GameFinished
 from dixit.api.views.mixins import GameObjectMixin, RoundObjectMixin
 from dixit.api.serializers.round import RoundListSerializer, RoundRetrieveSerializer
 from dixit.api.serializers.round import PlaySerializer, PlayCreateSerializer
@@ -101,7 +97,7 @@ class PlayProvideCreate(RoundObjectMixin, generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            return Response(seializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         game_round = self.get_round()
         player = Player.objects.get(game=game_round.game, user=request.user)
@@ -130,7 +126,7 @@ class PlayVoteCreate(RoundObjectMixin, generics.CreateAPIView):
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         if not serializer.is_valid():
-            return Response(seializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         game_round = self.get_round()
         player = Player.objects.get(game=game_round.game, user=request.user)

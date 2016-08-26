@@ -3,11 +3,10 @@ from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 from django.utils.translation import ugettext as _
-from django.core.exceptions import ObjectDoesNotExist
 
 from dixit import settings
 from dixit.utils import ChoicesEnum
-from dixit.game.exceptions import GameDeckExhausted, GameRoundIncomplete, GameFinished
+from dixit.game.exceptions import GameFinished
 
 
 class GameStatus(ChoicesEnum):
@@ -51,14 +50,14 @@ class Game(models.Model):
             - finished: all game rounds are `complete`
             - abandoned: all players have left the game
         """
-        from dixit.game.models.round import Round, RoundStatus
+        from dixit.game.models.round import RoundStatus
 
         def all_rounds_complete():
             return all(r.status == RoundStatus.COMPLETE for r in self.rounds.all())
 
         if (self.rounds.count() == 0 or
-            not self.current_round or
-            self.current_round.number == 0 and self.current_round.status == RoundStatus.NEW):
+                not self.current_round or
+                self.current_round.number == 0 and self.current_round.status == RoundStatus.NEW):
             status = GameStatus.NEW
 
         elif self.players.count() == 0:
@@ -89,10 +88,10 @@ class Game(models.Model):
         """
         Bootstraps a new game with a round and a storyteller player
         """
-        from dixit.game.models import Player, Round
+        from dixit.game.models import Player
 
         game = cls.objects.create(name=name)
-        player = Player.objects.create(game=game, user=user, name=player_name, owner=True)
+        Player.objects.create(game=game, user=user, name=player_name, owner=True)
 
         game.add_round()
         return game
@@ -102,8 +101,10 @@ class Game(models.Model):
         Checks if after the completion of the current round any player has achieved
         the goal score.
         """
+        from dixit.game.models.round import RoundStatus
+
         if (not self.current_round or
-            self.current_round.status != RoundStatus.COMPLETE):
+                self.current_round.status != RoundStatus.COMPLETE):
             return False
 
         for player in self.game.players():

@@ -1,14 +1,14 @@
 
 from django.db import IntegrityError
+from django.shortcuts import get_object_or_404
 
-from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework import generics, status
 
-from dixit.game.models import Player, Game
-from dixit.api.serializers.player import PlayerSerializer, PlayerCreateSerializer, PlayerScoreSerializer
+from dixit.game.models import Player
+from dixit.api.serializers.player import PlayerSerializer, PlayerCreateSerializer
 from dixit.api.views.mixins import GameObjectMixin
 
 
@@ -41,7 +41,8 @@ class PlayerList(GameObjectMixin, generics.ListCreateAPIView):
             player = game.add_player(request.user, request.data['name'])
         except IntegrityError as exc:
             if 'user_id' in str(exc):
-                return Response({"detail": 'You are already playing this game'}, status=status.HTTP_403_FORBIDDEN)
+                return Response({"detail": 'You are already playing this game'},
+                                status=status.HTTP_403_FORBIDDEN)
             return Response({"detail": "Username already in use"}, status=status.HTTP_403_FORBIDDEN)
 
         data = PlayerSerializer(player).data
