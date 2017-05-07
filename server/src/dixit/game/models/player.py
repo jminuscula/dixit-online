@@ -13,8 +13,8 @@ class Player(models.Model):
     Players are handed a security token to perform actions in the game, such as
     playing a round or abandoning.
     """
-    user = models.ForeignKey(User, related_name='players')
-    game = models.ForeignKey(Game, related_name='players')
+    user = models.ForeignKey(User, related_name='players', on_delete=models.PROTECT)
+    game = models.ForeignKey(Game, related_name='players', on_delete=models.PROTECT)
     number = models.IntegerField(default=0)  # (game, number form pk together)
     owner = models.BooleanField(default=False)
     name = models.CharField(max_length=64, blank=False)

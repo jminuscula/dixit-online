@@ -107,8 +107,8 @@ class GameTest(TestCase):
         game_round = self.game.add_round()
         Play.play_for_round(game_round, storyteller, storyteller._pick_card(), 'test')
 
-        next_round = self.game.next_round()
-        self.assertTrue(next_round is None)
+        with self.assertRaises(GameRoundIncomplete):
+            self.game.next_round()
         self.assertEqual(self.game.rounds.count(), 1)
 
     def test_game_can_advance_round_when_previous_is_complete(self):

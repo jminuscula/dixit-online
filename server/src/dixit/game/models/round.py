@@ -35,12 +35,12 @@ class Round(models.Model):
     in order to confuse other players.
     """
 
-    game = models.ForeignKey(Game, related_name='rounds')
+    game = models.ForeignKey(Game, related_name='rounds', on_delete=models.PROTECT)
     number = models.IntegerField(default=0)  # (game, number form pk together)
     status = models.CharField(max_length=16, default='new', choices=RoundStatus.choices())
     turn = models.ForeignKey(Player, null=True, on_delete=models.SET_NULL)
     n_players = models.IntegerField(default=1)
-    card = models.ForeignKey(Card, null=True, related_name='system_round_play')
+    card = models.ForeignKey(Card, null=True, related_name='system_round_play', on_delete=models.SET_NULL)
 
     class Meta:
         verbose_name = _('round')
@@ -192,16 +192,16 @@ class Play(models.Model):
     voting on all the available cards at the end of the round.
     """
 
-    game_round = models.ForeignKey(Round, related_name='plays')
+    game_round = models.ForeignKey(Round, related_name='plays', on_delete=models.PROTECT)
     player = models.ForeignKey(Player, related_name='plays',
                                null=True, on_delete=models.SET_NULL)
 
     # card being played in phase 1
-    card_provided = models.ForeignKey(Card, related_name='plays')
+    card_provided = models.ForeignKey(Card, related_name='plays', on_delete=models.PROTECT)
     story = models.CharField(max_length=256, null=True)
 
     # card voted in phase 2 (storyteller can't vote)
-    card_voted = models.ForeignKey(Card, null=True, related_name='chosen')
+    card_voted = models.ForeignKey(Card, null=True, related_name='chosen', on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = _('play')

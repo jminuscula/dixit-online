@@ -74,7 +74,7 @@ class CardDescription(models.Model):
     Cards from other players that have been voted will also have this description
     attached, with a variable confidence depending on ratio of players who voted it.
     """
-    card = models.ForeignKey(Card, related_name='description')
+    card = models.ForeignKey(Card, related_name='description', on_delete=models.CASCADE)
     description = models.CharField(max_length=256)
     confidence = models.IntegerField(default=50)
 

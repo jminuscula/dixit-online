@@ -31,7 +31,7 @@ class Game(models.Model):
     name = models.CharField(max_length=64)
     status = models.CharField(max_length=16, default='new', choices=GameStatus.choices())
     created_on = models.DateTimeField(auto_now_add=True)
-    current_round = models.ForeignKey('Round', null=True, related_name='current_round')
+    current_round = models.ForeignKey('Round', null=True, related_name='current_round', on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = _('game')
@@ -107,7 +107,7 @@ class Game(models.Model):
                 self.current_round.status != RoundStatus.COMPLETE):
             return False
 
-        for player in self.game.players():
+        for player in self.players.all():
             if player.score >= settings.GAME_GOAL_SCORE:
                 return True
 
