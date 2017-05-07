@@ -1,8 +1,6 @@
-"""
-Django 1.9.7 settings for dixit project.
-"""
 
 import os
+
 
 # Game settings
 GAME_HAND_SIZE = 5
@@ -13,6 +11,7 @@ GAME_MAX_ROUND_SCORE = 4
 GAME_GOAL_SCORE = 21
 
 
+DEBUG = True
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, '../static')
@@ -21,16 +20,12 @@ STATIC_ROOT = os.path.join(BASE_DIR, '../static')
 # Folder with game card images
 CARD_IMAGES_PATH = os.path.join(BASE_DIR, '../../cards')
 
-# Quick-start development settings - unsuitable for production
-# See https://docs.djangoproject.com/en/1.9/howto/deployment/checklist/
 
 SECRET_KEY = 'eo73+@(#4%a+uby-9!-_@$%wr%o047%rneii*bu@5nfl@k4t-!'
 TOKEN_LENGTH = 16
-
-
-DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
+    'localhost',
 ]
 
 
@@ -49,6 +44,7 @@ INSTALLED_APPS = [
     'dixit.api',
 ]
 
+
 MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -60,7 +56,9 @@ MIDDLEWARE_CLASSES = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+
 ROOT_URLCONF = 'dixit.urls'
+
 
 TEMPLATES = [
     {
@@ -80,7 +78,9 @@ TEMPLATES = [
     },
 ]
 
+
 WSGI_APPLICATION = 'dixit.wsgi.application'
+
 
 DATABASES = {
     'default': {
@@ -88,6 +88,7 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
@@ -98,6 +99,7 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
     ),
 }
+
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -114,7 +116,9 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+
 LOGIN_REDIRECT_URL = r'/'
+
 
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
@@ -124,8 +128,9 @@ USE_TZ = True
 
 
 FIXTURE_DIRS = (
-   os.path.join(BASE_DIR, 'dixit/fixtures'),
+    os.path.join(BASE_DIR, 'dixit/fixtures'),
 )
+
 
 if DEBUG:
     del REST_FRAMEWORK['DEFAULT_RENDERER_CLASSES']
