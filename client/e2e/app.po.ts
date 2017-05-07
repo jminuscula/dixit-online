@@ -1,3 +1,5 @@
+import { browser, element, by } from 'protractor';
+
 export class DixitOnlineClientPage {
   navigateTo() {
     return browser.get('/');
