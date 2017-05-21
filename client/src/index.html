@@ -1,14 +1,50 @@
 <!doctype html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>DixitOnlineClient</title>
-  <base href="/">
+    <meta charset="utf-8">
+    <title>Dixit Online</title>
+    <base href="/">
 
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <style media="screen">
+        html {
+            height: 100%;
+        }
+        body {
+            margin: 0;
+            color: rgb(65, 57, 68);
+            background-color: rgb(227, 227, 227);
+        }
+        .loading-app {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            justify-content: center;
+            align-items: center
+        }
+        .loading-app header {
+            text-align: center;
+            align-self: center;
+        }
+        .loading-app .logo {
+            display: block;
+            width: 75vw;
+            max-width: 640px;
+        }
+        .loading-app h1 {
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
 <body>
-  <app-root>Loading...</app-root>
+    <app-root>
+        <div class="loading-app">
+            <header>
+                <img class="logo" src="/assets/img/dixit-online-logo.png" alt="Dixit Online" />
+                <h1>loading...</h1>
+            </header>
+        </div>
+    </app-root>
 </body>
 </html>
