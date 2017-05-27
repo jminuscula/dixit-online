@@ -9,7 +9,7 @@ from rest_framework import generics, status
 
 from dixit.game.models import Player
 from dixit.api.serializers.player import PlayerSerializer, PlayerCreateSerializer
-from dixit.api.views.mixins import GameObjectMixin
+from dixit.api.views.game.mixins import GameObjectMixin
 
 
 class PlayerList(GameObjectMixin, generics.ListCreateAPIView):

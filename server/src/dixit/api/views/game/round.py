@@ -7,7 +7,7 @@ from rest_framework import generics, status
 from dixit.game.models import Round, Play, Player
 from dixit.game.models.round import RoundStatus
 from dixit.game.exceptions import GameInvalidPlay, GameDeckExhausted, GameFinished
-from dixit.api.views.mixins import GameObjectMixin, RoundObjectMixin
+from dixit.api.views.game.mixins import GameObjectMixin, RoundObjectMixin
 from dixit.api.serializers.round import RoundListSerializer, RoundRetrieveSerializer
 from dixit.api.serializers.round import PlaySerializer, PlayCreateSerializer
 from dixit.api.permissions import GamePlayer, PlayerOwned
