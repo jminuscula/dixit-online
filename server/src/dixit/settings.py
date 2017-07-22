@@ -39,6 +39,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
 
+    'dixit.account',
     'dixit.game',
     'dixit.api',
 ]
