@@ -2,8 +2,8 @@
 from rest_framework import serializers
 
 from dixit.game.models import Game
-from dixit.api.serializers.round import RoundListSerializer
-from dixit.api.serializers.player import PlayerScoreSerializer
+from dixit.api.game.serializers.round import RoundListSerializer
+from dixit.api.game.serializers.player import PlayerScoreSerializer
 
 
 class GameBaseSerializer(serializers.HyperlinkedModelSerializer):

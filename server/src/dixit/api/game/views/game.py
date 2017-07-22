@@ -5,7 +5,7 @@ from rest_framework import generics, status
 
 from dixit.game.models import Game
 from dixit.game.exceptions import GameDeckExhausted
-from dixit.api.serializers.game import GameListSerializer, GameCreateSerializer, GameRetrieveSerializer
+from dixit.api.game.serializers.game import GameListSerializer, GameCreateSerializer, GameRetrieveSerializer
 
 
 class GameList(generics.ListCreateAPIView):

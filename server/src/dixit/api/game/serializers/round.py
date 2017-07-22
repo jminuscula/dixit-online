@@ -5,8 +5,8 @@ from django.core.exceptions import ObjectDoesNotExist
 
 from dixit.game.models import Game, Round, Player, Play, Card
 from dixit.game.models.round import RoundStatus
-from dixit.api.serializers.player import PlayerSerializer
-from dixit.api.serializers.card import CardAnonymousSerializer
+from dixit.api.game.serializers.player import PlayerSerializer
+from dixit.api.game.serializers.card import CardAnonymousSerializer
 
 
 class RoundListSerializer(serializers.ModelSerializer):

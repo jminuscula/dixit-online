@@ -1,9 +1,9 @@
 
 from django.conf.urls import url
 
-from dixit.api.views.game import game
-from dixit.api.views.game import player
-from dixit.api.views.game import round
+from dixit.api.game.views import game
+from dixit.api.game.views import player
+from dixit.api.game.views import round
 
 
 urlpatterns = [

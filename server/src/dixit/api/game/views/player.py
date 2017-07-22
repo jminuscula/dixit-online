@@ -8,8 +8,8 @@ from rest_framework.response import Response
 from rest_framework import generics, status
 
 from dixit.game.models import Player
-from dixit.api.serializers.player import PlayerSerializer, PlayerCreateSerializer
-from dixit.api.views.game.mixins import GameObjectMixin
+from dixit.api.game.serializers.player import PlayerSerializer, PlayerCreateSerializer
+from dixit.api.game.views.mixins import GameObjectMixin
 
 
 class PlayerList(GameObjectMixin, generics.ListCreateAPIView):
