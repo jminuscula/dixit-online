@@ -1,5 +1,6 @@
 
 import os
+import datetime
 
 
 # Game settings
@@ -99,6 +100,10 @@ REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
     ),
+}
+
+JWT_AUTH = {
+    'JWT_EXPIRATION_DELTA': datetime.timedelta(hours=24),
 }
 
 
