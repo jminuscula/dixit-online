@@ -1,11 +1,13 @@
 import { NgModule } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { Http, RequestOptions } from '@angular/http';
 import { RouterModule } from '@angular/router';
 import { AuthHttp, AuthConfig } from 'angular2-jwt';
 
 import { AuthService } from './auth.service';
 import { IsAuthenticatedGuard } from './auth.guard';
-import { LoginComponent } from './login.component';
+import { LoginComponent, LogoutComponent } from './login.component';
 
 
 export function authHttpServiceFactory(http: Http, options: RequestOptions) {
@@ -22,10 +24,13 @@ const AuthProvider = {
 
 @NgModule({
     imports: [
+        CommonModule,
+        FormsModule,
         RouterModule,
     ],
     declarations: [
         LoginComponent,
+        LogoutComponent,
     ],
     providers: [
         AuthProvider,

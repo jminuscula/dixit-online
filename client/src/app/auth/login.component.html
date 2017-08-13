@@ -2,6 +2,28 @@ logged in: {{ isLoggedIn() }}
 
 <p>
     <a routerLink="">home</a>
-    <span (click)="login()">login</span>
-    <span (click)="logout()">logout</span>
+    <a *ngIf="isLoggedIn()" routerLink="/logout">logout</a>
 </p>
+
+<div *ngIf="!isLoggedIn()" class="">
+    <form (ngSubmit)="login(loginForm)" #loginForm="ngForm" ngNativeValidate>
+        <div>
+            <labeL>
+                Username
+                <input type="text" [(ngModel)]="auth.username" name="username" required />
+            </labeL>
+        </div>
+        <div>
+            <labeL>
+                Password
+                <input type="text" [(ngModel)]="auth.password" name="password" required />
+            </labeL>
+        </div>
+        <div *ngIf="loginForm.errors">
+            valid: {{ loginForm.valid }}
+        </div>
+        <div>
+            <input type="submit" value="Login" />
+        </div>
+    </form>
+</div>

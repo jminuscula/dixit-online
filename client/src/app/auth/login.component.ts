@@ -1,5 +1,6 @@
 
-import { Component } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
+import { Router } from '@angular/router';
 
 import { AuthService } from './auth.service';
 
@@ -9,27 +10,50 @@ import { AuthService } from './auth.service';
     templateUrl: './login.component.html',
 })
 export class LoginComponent {
-    private loggedIn: boolean;
+    private auth;
 
-    constructor(private authService: AuthService) {}
+    constructor(private authService: AuthService, private router: Router) {
+        this.auth = {};
+    }
 
     isLoggedIn() {
         return this.authService.isAuthenticated();
     }
 
-    login() {
+    onLogin() {
+        this.router.navigate(['']);
+    }
+
+    login(form) {
         if (this.authService.isAuthenticated()) {
             console.log('already authenticated');
             return this;
         }
 
-        this.authService.login('player1', 'password')
-            .then(success => console.log('success:', success));
-    }
+        const setLoginError = () => {
+            form.control.setErrors({
+                invalidLogin: true
+            });
+        }
 
-    logout() {
-        this.authService.logout();
-        console.log('logged out');
+        this.authService.login(this.auth.username, this.auth.password)
+                        .then(() => this.onLogin())
+                        .catch(setLoginError);
     }
 
 };
+
+
+@Component({
+    template: '',
+})
+export class LogoutComponent implements OnInit {
+
+    constructor(private authService: AuthService, private router: Router) {}
+
+    ngOnInit() {
+        this.authService.logout();
+        this.router.navigate(['login']);
+    }
+
+}
