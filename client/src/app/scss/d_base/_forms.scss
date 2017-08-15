@@ -1,0 +1,52 @@
+
+$element-spacing: 0.25em;
+$field-spacing: 0.75em;
+$border-radius: 5px;
+
+.form-field {
+    margin-bottom: $field-spacing;
+}
+
+.form-submit {
+    margin: ($field-spacing * 2) 0;
+}
+
+.form-error {
+    padding: 0 $field-spacing;
+
+    background: $color-error-light;
+    border: 1px solid $color-error-dark;
+    border-radius: $border-radius;
+
+    color: $color-error-dark;
+}
+
+label {
+    display: block;
+    margin-bottom: $element-spacing;
+    @extend .small-caps;
+}
+
+input {
+    border-radius: $border-radius;
+    border: 1px solid $color-input-border;
+
+    font-size: 1.2em;
+    line-height: 2em;
+}
+
+input[type="text"],
+input[type="password"] {
+    width: 100%;
+    margin-bottom: $element-spacing;
+    padding: 0 $element-spacing;
+    box-shadow: inset 0 1px 3px 0px $color-input-shadow;
+}
+
+input[type="submit"] {
+    width: 100%;
+
+    border-radius: 0;
+    @extend .small-caps;
+    @extend .button;
+}

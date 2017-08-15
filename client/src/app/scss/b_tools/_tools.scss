@@ -1,0 +1,28 @@
+//
+// mixins, unit-conversions, media-queries
+//
+
+@mixin responsive($property, $value, $xs: null, $sm: null, $md: null, $lg: null, $xl: null){
+    #{$property}: $value;
+
+    @if $xs {
+        @media (max-width: $size-xs) { #{$property}: $xs; }
+    }
+    @if $sm {
+        @media (min-width: $size-xs) { #{$property}: $sm; }
+    }
+    @if $md {
+        @media (min-width: $size-sm) { #{$property}: $md; }
+    }
+    @if $lg {
+        @media (min-width: $size-md) { #{$property}: $lg; }
+    }
+    @if $xl {
+        @media (min-width: $size-lg) { #{$property}: $xl; }
+    }
+}
+
+.small-caps {
+    text-transform: lowercase;
+    font-variant: small-caps;
+}

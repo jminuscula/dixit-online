@@ -1,0 +1,45 @@
+//
+// building blocks, lists, headers, tables
+//
+
+.button {
+    display: block;
+    position: relative;
+    overflow: hidden;
+    padding: 1em 0;
+    background: $color-button-light;
+
+    @extend .small-caps;
+    color: white;
+    text-align: center;
+    cursor: pointer;
+
+    &::after {
+        content: '';
+        position: absolute;
+        width: 15%;
+        height: 200%;
+        background: $color-button-highlight;
+        z-index: 1;
+        top: 0;
+        left: 0;
+        margin: -5px 0 0 -5px;
+        transform-origin: top right;
+        transform: rotate(20deg);
+        transition: width 100ms ease-in-out;
+    }
+
+    &:hover::after {
+        width: 25%;
+    }
+}
+
+.brand {
+    margin: 2rem 0;
+    text-align: center;
+
+    .logo {
+        @include responsive(max-height, 15vh, $md: 10vh);
+    }
+
+}

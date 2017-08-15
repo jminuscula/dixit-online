@@ -1,27 +1,22 @@
-<p>
-    <a routerLink=""><i class="fa fa-home"></i> home</a>
-    <a *ngIf="isLoggedIn()" routerLink="/logout">logout</a>
-</p>
+<main class="login-screen simple-section">
+    <header class="brand">
+        <img class="logo" src="/assets/img/dixit-online-logo.png" />
+    </header>
 
-<div *ngIf="!isLoggedIn()" class="">
-    <form (ngSubmit)="login(loginForm)" #loginForm="ngForm" ngNativeValidate>
-        <div>
-            <labeL>
-                Username
-                <input type="text" [(ngModel)]="auth.username" name="username" required />
-            </labeL>
-        </div>
-        <div>
-            <labeL>
-                Password
-                <input type="text" [(ngModel)]="auth.password" name="password" required />
-            </labeL>
-        </div>
-        <div *ngIf="loginForm.errors">
-            valid: {{ loginForm.valid }}
-        </div>
-        <div>
-            <input type="submit" value="Login" />
-        </div>
-    </form>
-</div>
+    <section class="login-form" *ngIf="!isLoggedIn()">
+        <form (ngSubmit)="login(loginForm)" #loginForm="ngForm" ngNativeValidate #form>
+            <div class="form-field">
+                <label for="username">Username</label>
+                <input id="username" type="text" [(ngModel)]="auth.username" name="username" required />
+            </div>
+            <div class="form-field">
+                <label for="password">Password</label>
+                <input id="password" type="password" [(ngModel)]="auth.password" name="password" required />
+            </div>
+            <div class="form-error" *ngIf="loginForm.errors">
+                <p>Invalid user or password</p>
+            </div>
+            <submit-form value="Login"></submit-form>
+        </form>
+    </section>
+</main>

@@ -1,0 +1,22 @@
+//
+// page, layout, type, elements
+//
+
+@import "forms";
+
+body {
+    font-family: 'San Francisco', 'Helvetica Neue', sans-serif;
+}
+
+main {
+    height: 100vh;
+    width: 100vw;
+}
+
+.simple-section {
+    display: flex;
+    flex-flow: column nowrap;
+
+    header { flex: 0; }
+    section { flex: 1; }
+}

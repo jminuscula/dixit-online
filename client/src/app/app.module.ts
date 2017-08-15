@@ -23,8 +23,8 @@ import { SettingsValueProvider } from './settings/base';
         HttpModule,
         RouterModule.forRoot(routes),
 
-        GameModule,
         AuthModule,
+        GameModule
     ],
     providers: [
         BackendRoutesValueProvider,
