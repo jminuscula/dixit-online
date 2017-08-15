@@ -18,9 +18,13 @@
       "prefix": "app",
       "mobile": false,
       "styles": [
-        "styles.css"
+        "app/styles.scss"
       ],
-      "scripts": [],
+      "scripts": [
+        "vendor/fontawesome/fontawesome.min.js",
+        "vendor/fontawesome/regular.min.js",
+        "vendor/fontawesome/solid.min.js"
+      ],
       "environmentSource": "environments/environment.ts",
       "environments": {
         "dev": "environments/environment.ts",
