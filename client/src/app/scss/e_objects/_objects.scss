@@ -39,7 +39,7 @@
     text-align: center;
 
     .logo {
-        @include responsive(max-height, 15vh, $md: 10vh);
+        @include responsive(max-height, 15vh, $desktop: 10vh);
     }
 
 }

@@ -1,0 +1,58 @@
+
+$hd-sidebar-width: 190px;
+
+
+main {
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr auto;
+    grid-template-areas:
+        "game"
+        "game-menu"
+        "game-status";
+}
+
+@include from-size(desktop) {
+    main {
+        grid-template-columns: auto 1fr;
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "game-menu      hd-nav"
+            "game-menu      game"
+            "game-status    game";
+    }
+}
+
+@include from-size(desktop-hd) {
+    main {
+        grid-template-columns: auto 1fr auto;
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "game-menu   hd-nav  hd-nav"
+            "game-menu   game    game-status"
+    }
+}
+
+.game-menu {
+    grid-area: game-menu;
+    @include responsive(width, 100%, $desktop-hd: $hd-sidebar-width);
+    background: black;
+    color: white;
+}
+
+.hd-nav {
+    grid-area: hd-nav;
+    background: $color-background-highlight;
+    @include responsive(display, none, $desktop: initial);
+}
+
+.game {
+    grid-area: game;
+    background: $color-background;
+}
+
+.game-status {
+    grid-area: game-status;
+    @include responsive(width, 100%, $desktop-hd: $hd-sidebar-width);
+    background: white;
+}

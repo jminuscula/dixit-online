@@ -1,17 +1,21 @@
 <main class="login-screen simple-section">
     <header class="brand">
-        <img class="logo" src="/assets/img/dixit-online-logo.png" />
+        <a routerLink="" alt="home">
+            <img class="logo" src="/assets/img/dixit-online-logo.png" />
+        </a>
     </header>
 
     <section class="login-form" *ngIf="!isLoggedIn()">
         <form (ngSubmit)="login(loginForm)" #loginForm="ngForm" ngNativeValidate #form>
             <div class="form-field">
                 <label for="username">Username</label>
-                <input id="username" type="text" [(ngModel)]="auth.username" name="username" required />
+                <input id="username" type="text" tabindex="1" autofocus
+                    [(ngModel)]="auth.username" name="username" required />
             </div>
             <div class="form-field">
                 <label for="password">Password</label>
-                <input id="password" type="password" [(ngModel)]="auth.password" name="password" required />
+                <input id="password" type="password" tabindex="2"
+                    [(ngModel)]="auth.password" name="password" required />
             </div>
             <div class="form-error" *ngIf="loginForm.errors">
                 <p>Invalid user or password</p>

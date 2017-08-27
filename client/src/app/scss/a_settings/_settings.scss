@@ -2,10 +2,10 @@
 // project level configuration, variables and settings
 //
 
-$size-xs: 544px;
-$size-sm: 768px;
-$size-md: 992px;
-$size-lg: 1200px;
+$size-phablet: 544px;
+$size-tablet: 768px;
+$size-desktop: 992px;
+$size-desktop-hd: 1200px;
 
 
 //
@@ -22,3 +22,6 @@ $color-error-dark: #822e2e;
 $color-button-light: #403944;
 $color-button-dark: #403944;
 $color-button-highlight: rgba(255, 255, 255, 0.1);
+
+$color-background: #e3e3e3;
+$color-background-highlight: #c1beb4;
