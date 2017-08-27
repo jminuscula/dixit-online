@@ -1,25 +1,32 @@
 
 $hd-sidebar-width: 190px;
 
+$tablet-menu-height: 60vh;
+$tablet-menu-height-collapsed: 8vh;
+
+$tablet-menu-width: 90vw;
+$tablet-menu-width-collapsed: 100vw - $tablet-menu-width;
+
 
 main {
+    height: 100vh;
+    width: 100vw;
+
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: auto 1fr;
     grid-template-rows: 1fr auto;
     grid-template-areas:
-        "game"
-        "game-menu"
-        "game-status";
+        "game       game"
+        "game-menu  game-status";
 }
 
 @include from-size(desktop) {
     main {
-        grid-template-columns: auto 1fr;
+        grid-template-columns: auto auto 1fr;
         grid-template-rows: auto 1fr;
         grid-template-areas:
-            "game-menu      hd-nav"
-            "game-menu      game"
-            "game-status    game";
+            "game-menu  game-status hd-nav"
+            "game-menu  game-status game";
     }
 }
 
@@ -33,11 +40,106 @@ main {
     }
 }
 
+.game-menu,
+.game-status,
+.hd-nav,
+.game {
+    overflow: hidden;
+}
+
+
+/**
+ * GAME-MENU and GAME-STATUS sidebars
+ * in mobile, phablet and tablet,game-menu and game-status
+ * are collapsed vertically side-by-side, and share the horizontal space.
+ * When one of them is open, both grow vertically.
+ *
+ * In desktop+, heights do not change, but areas are collapsed when not open.
+ **/
+
+.game-menu,
+.game-status {
+     height: $tablet-menu-height-collapsed;
+ }
+
+.game-menu-open,
+.game-status-open {
+    .game-menu,
+    .game-status {
+        height: $tablet-menu-height;
+    }
+}
+
+.game-menu-open {
+    .game-menu {
+        width: $tablet-menu-width;
+    }
+    .game-status {
+        width: $tablet-menu-width-collapsed;
+    }
+}
+
+.game-status-open {
+    .game-menu {
+        width: $tablet-menu-width-collapsed;
+    }
+    .game-status {
+        width: $tablet-menu-width;
+    }
+}
+
+@include from-size(desktop) {
+    .game-menu,
+    .game-status {
+        width: $hd-sidebar-width;
+        height: auto;
+    }
+
+    .game-menu-open,
+    .game-status-open {
+        .game-menu,
+        .game-status {
+            height: auto;
+        }
+    }
+
+    .game-menu-open {
+        .game-menu {
+            width: $hd-sidebar-width;
+        }
+        .game-status {
+            width: 0;
+        }
+    }
+    .game-status-open {
+        .game-menu {
+            width: 0;
+        }
+        .game-status {
+            width: $hd-sidebar-width;
+        }
+    }
+}
+
+@include from-size(desktop-hd) {
+    .game-menu-open,
+    .game-status-open {
+        .game-menu,
+        .game-status {
+            width: $hd-sidebar-width;
+        }
+    }
+}
+
 .game-menu {
     grid-area: game-menu;
-    @include responsive(width, 100%, $desktop-hd: $hd-sidebar-width);
     background: black;
     color: white;
+}
+
+.game-status {
+    grid-area: game-status;
+    background: white;
 }
 
 .hd-nav {
@@ -49,10 +151,4 @@ main {
 .game {
     grid-area: game;
     background: $color-background;
-}
-
-.game-status {
-    grid-area: game-status;
-    @include responsive(width, 100%, $desktop-hd: $hd-sidebar-width);
-    background: white;
 }

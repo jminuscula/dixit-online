@@ -2,9 +2,9 @@
 // mixins, unit-conversions, media-queries
 //
 
-@mixin responsive($property, $value, $phablet: null, $tablet: null, $desktop: null, $desktop-hd: null) {
-    @if $value {
-        #{$property}: $value;
+@mixin responsive($property, $default, $phablet: null, $tablet: null, $desktop: null, $desktop-hd: null) {
+    @if $default {
+        #{$property}: $default;
     }
 
     @if $phablet {
@@ -17,7 +17,7 @@
         @media (min-width: $size-desktop) { #{$property}: $desktop; }
     }
     @if $desktop-hd {
-        @media (min-width: $size-desktop) { #{$property}: $desktop-hd; }
+        @media (min-width: $size-desktop-hd) { #{$property}: $desktop-hd; }
     }
 }
 
@@ -33,6 +33,21 @@
     }
     @elseif $size == desktop-hd {
         @media (min-width: $size-desktop-hd) { @content; }
+    }
+}
+
+@mixin until-size($size) {
+    @if $size == phablet {
+        @media (max-width: $size-phablet) { @content; }
+    }
+    @elseif $size == tablet {
+        @media (max-width: $size-tablet) { @content; }
+    }
+    @elseif $size == desktop {
+        @media (max-width: $size-desktop) { @content; }
+    }
+    @elseif $size == desktop-hd {
+        @media (max-width: $size-desktop-hd) { @content; }
     }
 }
 
