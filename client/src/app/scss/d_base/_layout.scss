@@ -1,11 +1,11 @@
 
-$hd-sidebar-width: 190px;
+$hd-sidebar-width: 250px;
 
 $tablet-menu-height: 60vh;
-$tablet-menu-height-collapsed: 8vh;
+$tablet-menu-height-collapsed: 64px;
 
-$tablet-menu-width: 90vw;
-$tablet-menu-width-collapsed: 100vw - $tablet-menu-width;
+$tablet-menu-width: calc(100vw - #{$tablet-menu-height-collapsed});
+$tablet-menu-width-collapsed: $tablet-menu-height-collapsed;
 
 
 main {
@@ -25,8 +25,8 @@ main {
         grid-template-columns: auto auto 1fr;
         grid-template-rows: auto 1fr;
         grid-template-areas:
-            "game-menu  game-status hd-nav"
-            "game-menu  game-status game";
+            "game-menu      game"
+            "game-status    game";
     }
 }
 
@@ -59,8 +59,17 @@ main {
 
 .game-menu,
 .game-status {
-     height: $tablet-menu-height-collapsed;
- }
+    height: $tablet-menu-height-collapsed;
+}
+
+.game-menu {
+    width: $tablet-menu-width-collapsed;
+}
+
+.game-status {
+    width: $tablet-menu-width;
+}
+
 
 .game-menu-open,
 .game-status-open {
@@ -92,6 +101,13 @@ main {
     .game-menu,
     .game-status {
         width: $hd-sidebar-width;
+    }
+
+    .game-menu {
+        height: $tablet-menu-height-collapsed;
+    }
+
+    .game-status {
         height: auto;
     }
 
@@ -99,34 +115,47 @@ main {
     .game-status-open {
         .game-menu,
         .game-status {
-            height: auto;
+            width: $hd-sidebar-width;
         }
     }
 
     .game-menu-open {
+        grid-template-rows: 1fr auto;
+
         .game-menu {
-            width: $hd-sidebar-width;
+            height: auto;
         }
         .game-status {
-            width: 0;
+            height: $tablet-menu-height-collapsed;
         }
     }
     .game-status-open {
+        grid-template-rows: auto 1fr;
+
         .game-menu {
-            width: 0;
+            height: $tablet-menu-height-collapsed;
         }
         .game-status {
-            width: $hd-sidebar-width;
+            height: auto;
         }
     }
 }
 
 @include from-size(desktop-hd) {
+    .game-menu,
+    .game-status {
+        width: $hd-sidebar-width;
+        height: auto;
+    }
+
     .game-menu-open,
     .game-status-open {
+        grid-template-rows: auto 1fr;
+
         .game-menu,
         .game-status {
             width: $hd-sidebar-width;
+            height: auto;
         }
     }
 }
@@ -145,7 +174,7 @@ main {
 .hd-nav {
     grid-area: hd-nav;
     background: $color-background-highlight;
-    @include responsive(display, none, $desktop: initial);
+    @include responsive(display, none, $desktop-hd: initial);
 }
 
 .game {
