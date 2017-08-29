@@ -1,6 +1,9 @@
 
 import { Component } from '@angular/core';
 
+import { User } from '../auth/auth.models';
+import { UserService } from '../auth/user.service';
+
 
 @Component({
     selector: 'app-root',
@@ -9,4 +12,13 @@ import { Component } from '@angular/core';
 })
 export class GameComponent {
     title = 'dixit!';
+    currentUser: User;
+
+    constructor(private userService: UserService) {
+        userService.updateUserInfo();
+
+        userService.userInfo.subscribe((user) => {
+            this.currentUser = user;
+        });
+    }
 }

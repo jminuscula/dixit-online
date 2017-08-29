@@ -37,8 +37,10 @@ export class LoginComponent {
         }
 
         this.authService.login(this.auth.username, this.auth.password)
-                        .then(() => this.onLogin())
-                        .catch(setLoginError);
+            .subscribe(
+                data => this.onLogin(),
+                error => setLoginError()
+            );
     }
 
 };

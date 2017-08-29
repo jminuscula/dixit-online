@@ -3,6 +3,7 @@ import { Injectable, Inject } from '@angular/core';
 import { Http } from '@angular/http';
 
 import { tokenNotExpired } from 'angular2-jwt';
+import 'rxjs/add/operator/map';
 
 import { SETTINGS } from '../settings/base';
 import { BACKEND_URLS } from '../settings/backend.routes';
@@ -35,13 +36,8 @@ export class AuthService {
             return true;
         }
 
-        return new Promise((resolve, reject) => {
-            this.http.post(loginUrl, {username, password})
-                .toPromise()
-                .then(doLogin)
-                .then(resolve)
-                .catch(reject);
-        });
+        return this.http.post(loginUrl, {username, password})
+                   .map(doLogin);
     }
 
     logout() {
