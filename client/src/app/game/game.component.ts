@@ -20,8 +20,8 @@ export class GameComponent {
         private userService: UserService,
         private gameService: GameService
     ) {
-        userService.updateUserInfo();
-        userService.userInfo.subscribe((user) => {
+        userService.updateCurrentUser();
+        userService.currentUser.subscribe((user) => {
             this.currentUser = user;
             gameService.loadGames(GameStatus.NEW, user.username);
         });

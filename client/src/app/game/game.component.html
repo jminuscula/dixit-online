@@ -1,12 +1,12 @@
 <main class="">
     <aside class="game-menu">
-        <menu [user]=currentUser [game]=currentGame></menu>
+        <menu [currentGame]=currentGame></menu>
     </aside>
     <nav class="hd-nav">
         <p>new game</p>
     </nav>
     <section class="game">
-        <p>game</p>
+        <p *ngIf="currentGame">{{ currentGame.name }}</p>
     </section>
     <aside class="game-status">
         <p>scores</p>

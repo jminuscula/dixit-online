@@ -1,9 +1,12 @@
 
 import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
+import 'rxjs/add/operator/filter';
 
 import { User } from '../../auth/auth.models';
+import { UserService } from '../../auth/user.service';
 import { Game } from '../game.models';
+import { GameService } from '../game.service';
 
 
 @Component({
@@ -11,11 +14,19 @@ import { Game } from '../game.models';
     templateUrl: './menu.component.html',
 })
 export class MenuComponent {
-    @Input() user: User;
-    @Input() game: Game;
-    @Input() userGames: Game[];
+    @Input() currentGame: Game;
 
-    constructor() {
+    private user: User;
+    private playableGames: Observable<Game[]>;
 
+    constructor(private userService: UserService, private gameService: GameService) {
+        userService.currentUser.subscribe((user) => {
+            this.user = user;
+        });
+
+        this.playableGames = gameService.playableGames;
+        // this.playableGames = gameService.games.map((games) => {
+        //     return games.filter((game) => game.isPlayable());
+        // });
     }
 }

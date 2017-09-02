@@ -4,6 +4,13 @@
     </div>
 </div>
 <div class="player">
-    <h1>{{ user?.username }}</h1>
-    <h2>{{ game?.name }}</h2>
+    <h1 *ngIf="user">{{ user.username }}</h1>
+</div>
+<div class="active-games">
+    <ul>
+        <li *ngFor="let game of playableGames | async"
+        [ngClass]="{'active': game === currentGame}">
+            {{ game.name }}
+        </li>
+    </ul>
 </div>

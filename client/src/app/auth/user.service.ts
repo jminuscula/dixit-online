@@ -14,25 +14,25 @@ import { User } from './auth.models';
 
 @Injectable()
 export class UserService {
-    private userSubject: Subject<User>;
-    public userInfo: Observable<User>;
+    private currentUserSubject: Subject<User>;
+    public currentUser: Observable<User>;
 
     constructor(
         @Inject(SETTINGS) private settings,
         @Inject(BACKEND_URLS) private backendURLs,
         private http: AuthHttp)
     {
-        this.userSubject = new Subject();
-        this.userInfo = this.userSubject.asObservable().distinctUntilChanged();
+        this.currentUserSubject = new Subject();
+        this.currentUser = this.currentUserSubject.asObservable().distinctUntilChanged();
     }
 
-    updateUserInfo() {
+    updateCurrentUser() {
         const loginUrl = this.backendURLs.apiBase + this.backendURLs.auth.me;
 
         const pipeUserInfo = (response) => {
             let info = response.json();
             let user = new User(info);
-            this.userSubject.next(user);
+            this.currentUserSubject.next(user);
         }
 
         return this.http.get(loginUrl)

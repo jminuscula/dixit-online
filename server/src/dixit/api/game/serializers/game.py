@@ -33,7 +33,7 @@ class GameListSerializer(GameBaseSerializer):
 
     class Meta(GameBaseSerializer.Meta):
         model = Game
-        fields = ('id', 'name', 'status', 'n_players', 'current_round', )
+        fields = ('id', 'name', 'status', 'n_players', 'current_round', 'created_on', )
 
 
 class GameRetrieveSerializer(GameBaseSerializer):
