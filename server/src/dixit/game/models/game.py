@@ -1,5 +1,5 @@
 
-from django.db import models
+from django.db import models, transaction
 from django.dispatch import receiver
 from django.db.models.signals import post_save, post_delete
 from django.utils.translation import ugettext as _
@@ -29,9 +29,11 @@ class Game(models.Model):
     """
 
     name = models.CharField(max_length=64)
-    status = models.CharField(max_length=16, default='new', choices=GameStatus.choices())
+    status = models.CharField(max_length=16, default=GameStatus.NEW, choices=GameStatus.choices())
     created_on = models.DateTimeField(auto_now_add=True)
-    current_round = models.ForeignKey('Round', null=True, related_name='current_round', on_delete=models.PROTECT)
+    current_round = models.ForeignKey('Round', null=True,
+                                      related_name='current_round',
+                                      on_delete=models.PROTECT)
 
     class Meta:
         verbose_name = _('game')
@@ -84,6 +86,7 @@ class Game(models.Model):
         return self.current_round.turn
 
     @classmethod
+    @transaction.atomic
     def new_game(cls, name, user, player_name):
         """
         Bootstraps a new game with a round and a storyteller player
@@ -113,6 +116,7 @@ class Game(models.Model):
 
         return False
 
+    @transaction.atomic
     def add_player(self, user, player_name):
         """
         Adds a new player to the game and deals cards if a round is available
@@ -130,6 +134,7 @@ class Game(models.Model):
 
         return player
 
+    @transaction.atomic
     def add_round(self):
         """
         Adds a new round to the game for the next player's turn
@@ -152,10 +157,10 @@ class Game(models.Model):
         # We need to assign the round first and save second
         # since the post-save signal will run on game and current_round needs to be set.
         # Since a model can't be saved with unsaved related object, this is the only order possible
+        game_round.deal()
         game_round.save()
         self.current_round = game_round
         self.save()
-        game_round.deal()
 
         return game_round
 

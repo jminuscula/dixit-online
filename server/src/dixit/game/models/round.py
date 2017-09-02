@@ -100,7 +100,7 @@ class Round(models.Model):
 
         cards_needed = sum(card_deals.values())
         if cards_needed > len(cards_available):
-            raise GameDeckExhausted
+            raise GameDeckExhausted("Not enough cards to deal round", round=self)
 
         def get_choice(seq):
             idx = random.randint(0, len(seq) - 1)
