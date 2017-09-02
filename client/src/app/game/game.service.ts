@@ -8,39 +8,40 @@ import 'rxjs/add/operator/map';
 
 import { BACKEND_URLS } from '../settings/routes';
 
-import { Game } from './game.models';
-
-
-export enum GameStatus {
-    NEW = 'new',
-    ONGOING = 'ongoing',
-}
+import { StoreService } from '../webcommon/store.service';
+import { GamesCollection, Game, GameStatus } from './game.models';
 
 
 @Injectable()
 export class GameService {
-    private userGamesSubject: BehaviorSubject<Game[]>;
+    private userGamesSubject: BehaviorSubject<GamesCollection>;
 
-    public userGames: Observable<Game[]>;
+    public userGames: Observable<GamesCollection>;
     public currentGame: BehaviorSubject<Game>;
 
     constructor(
         @Inject(BACKEND_URLS) private backendURLs,
+        private store: StoreService,
         private http: AuthHttp)
     {
-        this.userGamesSubject = new BehaviorSubject([]);
+        this.userGamesSubject = new BehaviorSubject(new GamesCollection([]));
         this.currentGame = new BehaviorSubject(null);
 
         this.userGames = this.userGamesSubject.asObservable().distinctUntilChanged();
         this.userGames.subscribe(this.selectCurrentGame.bind(this));
-
     }
 
     selectCurrentGame(games) {
-        // TODO: load current game from localStorage
-        if (games.length) {
-            this.currentGame.next(games[0]);
+        let latestGameId = this.store.get(this.store.keys.lastGameId);
+        let current = games.select(latestGameId);
+        if (!current || !current.isPlayable()) {
+            current = games.selectFirstPlayable();
+            if (current) {
+                this.store.set(this.store.keys.lastGameId, current.id);
+            }
         }
+
+        this.currentGame.next(current);
     }
 
     loadGames(status: Array<GameStatus> | GameStatus, user: String) {
@@ -48,10 +49,9 @@ export class GameService {
 
         const pipeGamesData = (response) => {
             let gamesData = response.json();
-            let games = gamesData.map((data) => new Game(data));
-
-            this.userGamesSubject.next(games);
-            return games;
+            let collection = new GamesCollection(gamesData);
+            this.userGamesSubject.next(collection);
+            return collection;
         };
 
         return this.http.get(gameListUrl)

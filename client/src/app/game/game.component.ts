@@ -3,8 +3,8 @@ import { Component } from '@angular/core';
 
 import { User } from '../auth/auth.models';
 import { UserService } from '../auth/user.service';
-import { Game } from './game.models';
-import { GameStatus, GameService } from './game.service';
+import { Game, GameStatus } from './game.models';
+import { GameService } from './game.service';
 
 
 @Component({

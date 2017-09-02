@@ -1,6 +1,7 @@
 
 import { NgModule } from '@angular/core';
 
+import { StoreService } from './store.service';
 import { SubmitFormComponent } from './form.component';
 
 
@@ -10,6 +11,9 @@ import { SubmitFormComponent } from './form.component';
     ],
     exports: [
         SubmitFormComponent,
+    ],
+    providers: [
+        StoreService,
     ]
 })
 export class WebCommonModule { }
