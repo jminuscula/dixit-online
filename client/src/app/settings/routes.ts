@@ -10,8 +10,8 @@ export const RoutesValueProvider = {
     useValue: {
         home: '',
         auth: {
-            login: '/login',
-        }
+            login: '/login/',
+        },
     }
 };
 
@@ -20,8 +20,9 @@ export const BackendRoutesValueProvider = {
     useValue: {
         apiBase: 'http://localhost:8000/api',
         auth: {
-            me: '/user/me',
+            me: '/user/me/',
             login: '/user/api-token-auth/'
-        }
+        },
+        game: '/game/',
     }
 };

@@ -2,7 +2,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { AuthHttp } from 'angular2-jwt';
 import { Observable } from 'rxjs/Observable';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Subject } from 'rxjs/Subject';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 
@@ -14,7 +14,7 @@ import { User } from './auth.models';
 
 @Injectable()
 export class UserService {
-    private userSubject: BehaviorSubject<User>;
+    private userSubject: Subject<User>;
     public userInfo: Observable<User>;
 
     constructor(
@@ -22,7 +22,7 @@ export class UserService {
         @Inject(BACKEND_URLS) private backendURLs,
         private http: AuthHttp)
     {
-        this.userSubject = new BehaviorSubject(new User({}));
+        this.userSubject = new Subject();
         this.userInfo = this.userSubject.asObservable().distinctUntilChanged();
     }
 
