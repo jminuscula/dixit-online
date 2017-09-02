@@ -7,7 +7,7 @@ import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/distinctUntilChanged';
 
 import { SETTINGS } from '../settings/base';
-import { BACKEND_URLS } from '../settings/backend.routes';
+import { BACKEND_URLS } from '../settings/routes';
 
 import { User } from './auth.models';
 

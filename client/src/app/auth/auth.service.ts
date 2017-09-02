@@ -6,7 +6,7 @@ import { tokenNotExpired } from 'angular2-jwt';
 import 'rxjs/add/operator/map';
 
 import { SETTINGS } from '../settings/base';
-import { BACKEND_URLS } from '../settings/backend.routes';
+import { BACKEND_URLS } from '../settings/routes';
 
 
 @Injectable()

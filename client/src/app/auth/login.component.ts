@@ -1,7 +1,8 @@
 
-import { Component, OnInit} from '@angular/core';
+import { Component, OnInit, Inject } from '@angular/core';
 import { Router } from '@angular/router';
 
+import { URLS } from '../settings/routes';
 import { AuthService } from './auth.service';
 
 
@@ -12,7 +13,11 @@ import { AuthService } from './auth.service';
 export class LoginComponent {
     private auth;
 
-    constructor(private authService: AuthService, private router: Router) {
+    constructor(
+        private router: Router,
+        @Inject(URLS) private urls,
+        private authService: AuthService,
+    ) {
         this.auth = {};
     }
 
@@ -21,7 +26,7 @@ export class LoginComponent {
     }
 
     onLogin() {
-        this.router.navigate(['']);
+        this.router.navigate([this.urls.home]);
     }
 
     login(form) {
@@ -51,11 +56,15 @@ export class LoginComponent {
 })
 export class LogoutComponent implements OnInit {
 
-    constructor(private authService: AuthService, private router: Router) {}
+    constructor(
+        @Inject(URLS) private urls,
+        private authService: AuthService,
+        private router: Router
+    ) {}
 
     ngOnInit() {
         this.authService.logout();
-        this.router.navigate(['login']);
+        this.router.navigate([this.urls.auth.login]);
     }
 
 }
