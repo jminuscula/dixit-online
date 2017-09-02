@@ -13,6 +13,7 @@ export class Game {
     status: String;
     nPlayers: Object;
     createdOn: Date;
+    lastActive: Date;
 
     constructor(info) {
         this.id = info.id;
@@ -20,6 +21,7 @@ export class Game {
         this.status = info.status;
         this.nPlayers = info.n_players;
         this.createdOn = new Date(info.created_on);
+        this.lastActive = new Date(info.last_active);
     }
 
     isPlayable() {

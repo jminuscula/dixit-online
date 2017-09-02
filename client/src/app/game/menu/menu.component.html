@@ -3,14 +3,18 @@
         <i class="icon fa fa-bars"></i>
     </div>
 </div>
-<div class="player">
+<section class="player">
     <h1 *ngIf="user">{{ user.username }}</h1>
-</div>
-<div class="active-games">
-    <ul>
+</section>
+<section class="playable-games">
+    <nav>
         <li *ngFor="let game of playableGames | async"
+        class="playable-game"
+        (click)="selectGame(game)"
         [ngClass]="{'active': game === currentGame}">
-            {{ game.name }}
+            <b class="game-title">{{ game.name }}</b>
+            <time title="{{ game.lastActive }}">last active {{ game.lastActive | elapsedTime }} ago</time>
+            <i class="icon fa fa-angle-right"></i>
         </li>
-    </ul>
-</div>
+    </nav>
+</section>

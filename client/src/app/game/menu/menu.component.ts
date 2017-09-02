@@ -19,14 +19,18 @@ export class MenuComponent {
     private user: User;
     private playableGames: Observable<Game[]>;
 
-    constructor(private userService: UserService, private gameService: GameService) {
+    constructor(
+        private userService: UserService,
+        private gameService: GameService
+    ) {
         userService.currentUser.subscribe((user) => {
             this.user = user;
         });
 
         this.playableGames = gameService.playableGames;
-        // this.playableGames = gameService.games.map((games) => {
-        //     return games.filter((game) => game.isPlayable());
-        // });
+    }
+
+    selectGame(game) {
+        this.gameService.selectGame(game);
     }
 }

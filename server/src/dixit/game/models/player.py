@@ -21,6 +21,8 @@ class Player(models.Model):
     token = models.CharField(max_length=64)
     score = models.IntegerField(default=0)
     cards = models.ManyToManyField(Card, related_name='played_by')
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _('player')

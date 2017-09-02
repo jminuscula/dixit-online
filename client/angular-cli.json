@@ -22,7 +22,6 @@
       ],
       "scripts": [
         "vendor/fontawesome/fontawesome.min.js",
-        "vendor/fontawesome/regular.min.js",
         "vendor/fontawesome/solid.min.js"
       ],
       "environmentSource": "environments/environment.ts",

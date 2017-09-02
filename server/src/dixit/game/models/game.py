@@ -31,6 +31,7 @@ class Game(models.Model):
     name = models.CharField(max_length=64)
     status = models.CharField(max_length=16, default=GameStatus.NEW, choices=GameStatus.choices())
     created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
     current_round = models.ForeignKey('Round', null=True,
                                       related_name='current_round',
                                       on_delete=models.PROTECT)

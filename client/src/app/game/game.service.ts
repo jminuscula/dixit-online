@@ -76,4 +76,7 @@ export class GameService {
         return [currentGame].concat(playableOthers);
     }
 
+    selectGame(game) {
+        this.currentGame.next(game);
+    }
 }

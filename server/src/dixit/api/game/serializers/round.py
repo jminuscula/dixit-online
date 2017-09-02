@@ -3,7 +3,7 @@ import random
 from rest_framework import serializers
 from django.core.exceptions import ObjectDoesNotExist
 
-from dixit.game.models import Game, Round, Player, Play, Card
+from dixit.game.models import Round, Play, Card
 from dixit.game.models.round import RoundStatus
 from dixit.api.game.serializers.player import PlayerSerializer
 from dixit.api.game.serializers.card import CardAnonymousSerializer

@@ -41,6 +41,8 @@ class Round(models.Model):
     turn = models.ForeignKey(Player, null=True, on_delete=models.SET_NULL)
     n_players = models.IntegerField(default=1)
     card = models.ForeignKey(Card, null=True, related_name='system_round_play', on_delete=models.SET_NULL)
+    created_on = models.DateTimeField(auto_now_add=True)
+    modified_on = models.DateTimeField(auto_now=True)
 
     class Meta:
         verbose_name = _('round')

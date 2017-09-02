@@ -10,3 +10,41 @@
 .game-menu .player {
     text-align: center;
 }
+
+.game-menu .playable-games {
+    nav {
+        list-style-type: none;
+    }
+
+    .playable-game {
+        position: relative;
+        padding: 1em;
+
+        .game-title {
+            font-size: 1.2rem;
+        }
+
+        time {
+            display: block;
+            padding: 0.5em 0 0;
+            font-size: 0.8rem;
+        }
+    }
+
+    .playable-game .icon {
+        display: none;
+        position: absolute;
+        right: 1em;
+        bottom: 50%;
+        transform: translateY(50%);
+    }
+
+    .playable-game.active {
+        background: $color-background-highlight;
+        color: white;
+
+        .icon {
+            display: block;
+        }
+    }
+}
