@@ -1,0 +1,12 @@
+
+.game-menu .game-menu-handler {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    @include responsive(height, 100%, $desktop: auto);
+}
+
+.game-menu .player {
+    text-align: center;
+}

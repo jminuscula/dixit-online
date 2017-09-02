@@ -2,17 +2,5 @@
 // UI components
 //
 
-.login-form {
-    width: 60vw;
-    max-width: 320px;
-
-    margin: 0 auto;
-}
-
-.game-menu .game-menu-handler {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    @include responsive(height, 100%, $desktop: auto);
-}
+@import "login";
+@import "menu";
