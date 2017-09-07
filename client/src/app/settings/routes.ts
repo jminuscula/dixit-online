@@ -5,14 +5,19 @@ import { InjectionToken } from '@angular/core';
 export const URLS = new InjectionToken<string>('URLs');
 export const BACKEND_URLS = new InjectionToken<string>('Backend URLs');
 
-export const RoutesValueProvider = {
+export const AppRoutes = {
+    home: '',
+    auth: {
+        login: 'login',
+        logout: 'logout',
+    },
+    game: 'game/:id',
+    round: 'round/:id'
+};
+
+export const AppRoutesValueProvider = {
     provide: URLS,
-    useValue: {
-        home: '',
-        auth: {
-            login: '/login/',
-        },
-    }
+    useValue: AppRoutes,
 };
 
 export const BackendRoutesValueProvider = {

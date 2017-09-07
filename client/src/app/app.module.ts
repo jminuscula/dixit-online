@@ -9,7 +9,7 @@ import { GameModule } from './game/game.module';
 
 import { AppComponent } from './app.component';
 import { routes } from './app.routes';
-import { RoutesValueProvider, BackendRoutesValueProvider } from './settings/routes';
+import { AppRoutesValueProvider, BackendRoutesValueProvider } from './settings/routes';
 import { SettingsValueProvider } from './settings/base';
 
 
@@ -27,7 +27,7 @@ import { SettingsValueProvider } from './settings/base';
         GameModule
     ],
     providers: [
-        RoutesValueProvider,
+        AppRoutesValueProvider,
         BackendRoutesValueProvider,
         SettingsValueProvider,
     ],

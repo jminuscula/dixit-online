@@ -19,9 +19,11 @@
     .playable-game {
         position: relative;
         padding: 1em;
+        cursor: pointer;
 
         .game-title {
             font-size: 1.2rem;
+            font-weight: normal;
         }
 
         time {
@@ -42,7 +44,10 @@
     .playable-game.active {
         background: $color-background-highlight;
         color: white;
+    }
 
+    .playable-game.active,
+    .playable-game:hover {
         .icon {
             display: block;
         }
