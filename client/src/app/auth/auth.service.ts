@@ -27,7 +27,7 @@ export class AuthService {
     }
 
     login(username, password) {
-        const loginUrl = this.backendURLs.apiBase + this.backendURLs.auth.login;
+        const loginUrl = `${this.backendURLs.apiBase}/${this.backendURLs.auth.login}`;
 
         const doLogin = (response) => {
             this.token = response.json().token;

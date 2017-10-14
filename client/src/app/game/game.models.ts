@@ -14,6 +14,9 @@ export class Game {
     nPlayers: Object;
     createdOn: Date;
     lastActive: Date;
+    rounds: Object[];
+    scoreboard: Object[];
+
 
     constructor(info) {
         this.id = info.id;
@@ -22,6 +25,8 @@ export class Game {
         this.nPlayers = info.n_players;
         this.createdOn = new Date(info.created_on);
         this.lastActive = new Date(info.last_active);
+        this.rounds = info.rounds;
+        this.scoreboard = info.scoreboard;
     }
 
     isPlayable() {

@@ -27,7 +27,7 @@ export class UserService {
     }
 
     updateCurrentUser() {
-        const loginUrl = this.backendURLs.apiBase + this.backendURLs.auth.me;
+        const loginUrl = `${this.backendURLs.apiBase}/${this.backendURLs.auth.me}`;
 
         const pipeUserInfo = (response) => {
             let info = response.json();

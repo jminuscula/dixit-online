@@ -32,7 +32,7 @@ export class GameManagerService {
     }
 
     loadGames(status: Array<GameStatus> | GameStatus, user: String) {
-        const gameListUrl = this.backendURLs.apiBase + this.backendURLs.game;
+        const gameListUrl = `${this.backendURLs.apiBase}/${this.backendURLs.game}`;
 
         const pipeGamesData = (response) => {
             let gamesData = response.json();
@@ -50,13 +50,13 @@ export class GameManagerService {
     }
 
     getGame(gameId) {
+        const gameUrl = `${this.backendURLs.apiBase}/${this.backendURLs.game}/${gameId}`;
         return Observable.create(gameObserver => {
-            const findById = g => (g.id == gameId);
-
-            this.games.subscribe(games => {
-                let found = games.find(findById);
-                gameObserver.next(found);
-            });
+            const getGameDetails = (response) => {
+                let data = response.json();
+                gameObserver.next(new Game(data));
+            };
+            this.http.get(gameUrl).subscribe(getGameDetails);
         });
     }
 }
