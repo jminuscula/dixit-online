@@ -3,14 +3,17 @@ import { GameManagerComponent } from './game/manager/manager.component';
 import { IsAuthenticatedGuard } from './auth/auth.guard';
 import { LoginComponent, LogoutComponent } from './auth/login.component';
 
+import { DebugScreen } from 'game/debug.component';
+
+
 export const routes = [
-    { path: '', component: GameManagerComponent, pathMatch: 'full', canActivate: [IsAuthenticatedGuard],
+    { path: '', component: GameManagerComponent, canActivate: [IsAuthenticatedGuard],
       children: [
-        //   {
-        //       path: 'game/:gameId',
-        //       component: GameComponent,
-        //       pathMatch: 'full',
-        //   },
+          {
+              path: 'game/:gameId',
+              component: DebugScreen,
+              pathMatch: 'full',
+          },
       ]
     },
     { path: 'login', component: LoginComponent },

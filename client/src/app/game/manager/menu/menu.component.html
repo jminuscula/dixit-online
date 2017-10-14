@@ -10,7 +10,7 @@
     <nav>
         <li *ngFor="let game of playableGames | async"
         class="playable-game">
-            <a routerLinkActive="active">
+            <a routerLink="/game/{{ game.id }}" routerLinkActive="active">
                 <b class="game-title">{{ game.name }}</b>
                 <time title="{{ game.lastActive }}">last active {{ game.lastActive | elapsedTime }} ago</time>
                 <i class="icon fa fa-angle-right"></i>

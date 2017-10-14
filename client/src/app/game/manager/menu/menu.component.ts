@@ -29,8 +29,4 @@ export class MenuComponent {
 
         this.playableGames = gameManagerService.playableGames;
     }
-
-    selectGame(game) {
-        this.gameManagerService.selectGame(game);
-    }
 }

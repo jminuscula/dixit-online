@@ -25,9 +25,5 @@ export class GameManagerComponent {
             this.currentUser = user;
             gameManagerService.loadGames(GameStatus.NEW, user.username);
         });
-
-        gameManagerService.currentGame.subscribe((game) => {
-            this.currentGame = game;
-        });
     }
 }

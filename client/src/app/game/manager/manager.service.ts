@@ -5,7 +5,7 @@ import { Subject } from 'rxjs/Subject';
 
 import { AuthHttp } from 'angular2-jwt';
 import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/combineLatest';
+import 'rxjs/add/operator/filter';
 
 import { BACKEND_URLS } from 'settings/routes';
 
@@ -27,15 +27,8 @@ export class GameManagerService {
         private http: AuthHttp)
     {
         this.gamesSubject = new Subject();
-        this.currentGame = new Subject();
-
         this.games = this.gamesSubject.asObservable();
-        this.games.subscribe(this.selectCurrentGame.bind(this));
-
-        this.playableGames = this.games.combineLatest(
-            this.currentGame,
-            this.getPlayableGames.bind(this)
-        );
+        this.playableGames = this.games.filter(this.getPlayableGames);
     }
 
     loadGames(status: Array<GameStatus> | GameStatus, user: String) {
@@ -51,32 +44,7 @@ export class GameManagerService {
                    .subscribe(pipeGamesData);
     }
 
-    selectCurrentGame(games) {
-        let current = null;
-        let latestGameId = this.store.get(this.store.keys.lastGameId);
-
-        for (let game of games) {
-            if (game.isPlayable()) {
-                if (game.id === latestGameId) {
-                    current = game;
-                    break;
-                }
-                if (!current) {
-                    current = game;
-                }
-            }
-        }
-
-        this.store.set(this.store.keys.lastGameId, current.id);
-        this.currentGame.next(current);
-    }
-
-    getPlayableGames(games, currentGame) {
-        let playableOthers = games.filter((game) => game.isPlayable() && game !== currentGame);
-        return [currentGame].concat(playableOthers);
-    }
-
-    selectGame(game) {
-        this.currentGame.next(game);
+    getPlayableGames(games) {
+        return games.filter((game) => game.isPlayable());
     }
 }
