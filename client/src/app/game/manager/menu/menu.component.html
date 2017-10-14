@@ -1,0 +1,20 @@
+<div class="game-menu-handler">
+    <div>
+        <i class="icon fa fa-bars"></i>
+    </div>
+</div>
+<section class="player">
+    <h1 *ngIf="user">{{ user.username }}</h1>
+</section>
+<section class="playable-games">
+    <nav>
+        <li *ngFor="let game of playableGames | async"
+        class="playable-game">
+            <a routerLinkActive="active">
+                <b class="game-title">{{ game.name }}</b>
+                <time title="{{ game.lastActive }}">last active {{ game.lastActive | elapsedTime }} ago</time>
+                <i class="icon fa fa-angle-right"></i>
+            </a>
+        </li>
+    </nav>
+</section>

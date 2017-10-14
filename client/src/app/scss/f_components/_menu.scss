@@ -18,6 +18,10 @@
 
     .playable-game {
         position: relative;
+    }
+
+    .playable-game a {
+        display: block;
         padding: 1em;
 
         .game-title {
@@ -39,7 +43,7 @@
         transform: translateY(50%);
     }
 
-    .playable-game.active {
+    .playable-game a.active {
         background: $color-background-highlight;
         color: white;
 

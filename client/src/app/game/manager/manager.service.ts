@@ -2,19 +2,19 @@
 import { Injectable, Inject } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
-// import { Subject } from 'rxjs/BehaviorSubject';
+
 import { AuthHttp } from 'angular2-jwt';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/combineLatest';
 
-import { BACKEND_URLS } from '../settings/routes';
+import { BACKEND_URLS } from 'settings/routes';
 
-import { StoreService } from '../webcommon/store.service';
-import { Game, GameStatus } from './game.models';
+import { StoreService } from 'webcommon/store.service';
+import { Game, GameStatus } from 'game/game.models';
 
 
 @Injectable()
-export class GameService {
+export class GameManagerService {
     private gamesSubject: Subject<Game[]>;
 
     public currentGame: Subject<Game>;

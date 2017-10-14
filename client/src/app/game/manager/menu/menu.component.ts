@@ -3,10 +3,10 @@ import { Component, Input } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import 'rxjs/add/operator/filter';
 
-import { User } from '../../auth/auth.models';
-import { UserService } from '../../auth/user.service';
-import { Game } from '../game.models';
-import { GameService } from '../game.service';
+import { User } from 'auth/auth.models';
+import { UserService } from 'auth/user.service';
+import { Game } from 'game/game.models';
+import { GameManagerService } from 'game/manager/manager.service';
 
 
 @Component({
@@ -21,16 +21,16 @@ export class MenuComponent {
 
     constructor(
         private userService: UserService,
-        private gameService: GameService
+        private gameManagerService: GameManagerService
     ) {
         userService.currentUser.subscribe((user) => {
             this.user = user;
         });
 
-        this.playableGames = gameService.playableGames;
+        this.playableGames = gameManagerService.playableGames;
     }
 
     selectGame(game) {
-        this.gameService.selectGame(game);
+        this.gameManagerService.selectGame(game);
     }
 }
