@@ -2,6 +2,7 @@
 import { Injectable, Inject } from '@angular/core';
 import { Observable } from 'rxjs/Observable';
 import { Subject } from 'rxjs/Subject';
+import { BehaviorSubject } from 'rxjs/BehaviorSubject';
 
 import { AuthHttp } from 'angular2-jwt';
 import 'rxjs/add/operator/map';
@@ -15,20 +16,19 @@ import { Game, GameStatus } from 'game/game.models';
 
 @Injectable()
 export class GameManagerService {
-    private gamesSubject: Subject<Game[]>;
+    private gamesSubject: BehaviorSubject<Game[]>;
 
-    public currentGame: Subject<Game>;
-    public playableGames: Observable<Game[]>;
     public games: Observable<Game[]>;
+    public playableGames: Observable<Game[]>;
 
     constructor(
         @Inject(BACKEND_URLS) private backendURLs,
         private store: StoreService,
         private http: AuthHttp)
     {
-        this.gamesSubject = new Subject();
+        this.gamesSubject = new BehaviorSubject([]);
         this.games = this.gamesSubject.asObservable();
-        this.playableGames = this.games.filter(this.getPlayableGames);
+        this.playableGames = this.games.filter(this.playableGamesFilter);
     }
 
     loadGames(status: Array<GameStatus> | GameStatus, user: String) {
@@ -37,6 +37,7 @@ export class GameManagerService {
         const pipeGamesData = (response) => {
             let gamesData = response.json();
             let games = gamesData.map((data) => new Game(data));
+            console.log('loading games', games);
             this.gamesSubject.next(games);
         };
 
@@ -44,7 +45,18 @@ export class GameManagerService {
                    .subscribe(pipeGamesData);
     }
 
-    getPlayableGames(games) {
+    playableGamesFilter(games) {
         return games.filter((game) => game.isPlayable());
+    }
+
+    getGame(gameId) {
+        return Observable.create(gameObserver => {
+            const findById = g => (g.id == gameId);
+
+            this.games.subscribe(games => {
+                let found = games.find(findById);
+                gameObserver.next(found);
+            });
+        });
     }
 }
