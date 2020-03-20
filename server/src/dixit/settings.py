@@ -31,8 +31,8 @@ ALLOWED_HOSTS = [
 
 
 CORS_ORIGIN_WHITELIST = [
-    'localhost:8000',
-    'localhost:4200',
+    'http://localhost:8000',
+    'http://localhost:4200',
 ]
 
 
@@ -53,7 +53,7 @@ INSTALLED_APPS = [
 ]
 
 
-MIDDLEWARE_CLASSES = [
+MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 
     'django.middleware.security.SecurityMiddleware',
