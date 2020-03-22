@@ -25,13 +25,13 @@
     @if $size == phablet {
         @media (max-width: $size-phablet) { @content; }
     }
-    @elseif $size == tablet {
+    @else if $size == tablet {
         @media (min-width: $size-tablet) { @content; }
     }
-    @elseif $size == desktop {
+    @else if $size == desktop {
         @media (min-width: $size-desktop) { @content; }
     }
-    @elseif $size == desktop-hd {
+    @else if $size == desktop-hd {
         @media (min-width: $size-desktop-hd) { @content; }
     }
 }
@@ -40,13 +40,13 @@
     @if $size == phablet {
         @media (max-width: $size-phablet) { @content; }
     }
-    @elseif $size == tablet {
+    @else if $size == tablet {
         @media (max-width: $size-tablet) { @content; }
     }
-    @elseif $size == desktop {
+    @else if $size == desktop {
         @media (max-width: $size-desktop) { @content; }
     }
-    @elseif $size == desktop-hd {
+    @else if $size == desktop-hd {
         @media (max-width: $size-desktop-hd) { @content; }
     }
 }

@@ -1,12 +1,12 @@
 
 import { Injectable, Inject } from '@angular/core';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
-import { BehaviorSubject } from 'rxjs/BehaviorSubject';
+import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 
-import { AuthHttp } from 'angular2-jwt';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/filter';
+import { HttpClient } from '@angular/common/http';
+import { map } from 'rxjs/operators';
+import { filter } from 'rxjs/operators';
 
 import { BACKEND_URLS } from 'settings/routes';
 
@@ -24,11 +24,11 @@ export class GameManagerService {
     constructor(
         @Inject(BACKEND_URLS) private backendURLs,
         private store: StoreService,
-        private http: AuthHttp)
+        private http: HttpClient)
     {
         this.gamesSubject = new BehaviorSubject([]);
         this.games = this.gamesSubject.asObservable();
-        this.playableGames = this.games.filter(this.playableGamesFilter);
+        this.playableGames = this.games.pipe(filter(this.playableGamesFilter));
     }
 
     loadGames(status: Array<GameStatus> | GameStatus, user: String) {

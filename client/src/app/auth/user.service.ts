@@ -1,10 +1,9 @@
 
 import { Injectable, Inject } from '@angular/core';
-import { AuthHttp } from 'angular2-jwt';
-import { Observable } from 'rxjs/Observable';
-import { Subject } from 'rxjs/Subject';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/distinctUntilChanged';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { Subject } from 'rxjs';
+import { distinctUntilChanged } from 'rxjs/operators';
 
 import { SETTINGS } from '../settings/base';
 import { BACKEND_URLS } from '../settings/routes';
@@ -20,10 +19,10 @@ export class UserService {
     constructor(
         @Inject(SETTINGS) private settings,
         @Inject(BACKEND_URLS) private backendURLs,
-        private http: AuthHttp)
+        private http: HttpClient)
     {
         this.currentUserSubject = new Subject();
-        this.currentUser = this.currentUserSubject.asObservable().distinctUntilChanged();
+        this.currentUser = this.currentUserSubject.asObservable().pipe(distinctUntilChanged());
     }
 
     updateCurrentUser() {

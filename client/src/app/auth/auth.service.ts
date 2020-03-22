@@ -1,9 +1,9 @@
 
 import { Injectable, Inject } from '@angular/core';
-import { Http } from '@angular/http';
+import { HttpClient } from '@angular/common/http';
 
-import { tokenNotExpired } from 'angular2-jwt';
-import 'rxjs/add/operator/map';
+import { JwtHelperService } from '@auth0/angular-jwt';
+import { tap } from 'rxjs/operators';
 
 import { SETTINGS } from '../settings/base';
 import { BACKEND_URLS } from '../settings/routes';
@@ -17,13 +17,13 @@ export class AuthService {
     constructor(
         @Inject(SETTINGS) private settings,
         @Inject(BACKEND_URLS) private backendURLs,
-        private http: Http)
+        private http: HttpClient)
     {
         this.storage = window.localStorage;
     }
 
     isAuthenticated() {
-        return tokenNotExpired();
+        return new JwtHelperService().isTokenExpired();
     }
 
     login(username, password) {
@@ -36,8 +36,7 @@ export class AuthService {
             return true;
         }
 
-        return this.http.post(loginUrl, {username, password})
-                   .map(doLogin);
+        return this.http.post(loginUrl, {username, password}).pipe(tap(doLogin));
     }
 
     logout() {
